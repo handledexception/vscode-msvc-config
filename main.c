@@ -24,5 +24,6 @@ int main(){
     foo();
 
     getch();
+    
     return 0;
 }

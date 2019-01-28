@@ -25,7 +25,7 @@
         },
         
         {
-            "label": "GCC Build Debug",
+            "label": "GCC Build Debug (64-bit)",
             "type": "shell",
             "command": "gcc",
             "args": [

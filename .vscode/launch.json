@@ -30,7 +30,7 @@
         },
 
         {
-            "name": "Debug GDB",
+            "name": "GDB Debug (64-bit)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/main.exe",
