@@ -1,0 +1,1 @@
+Create the paths ${workspaceFolder}/Debug/x86 and x64 before compiling with MSVC.
