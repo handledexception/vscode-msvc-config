@@ -1,0 +1,21 @@
+#TODO:
+# - setup builds for Release and Debug, x86 and x64
+
+config("wincfg") {
+    defines = [ "UNICODE" ]
+    libs = [
+        "user32.lib"
+    ]
+}
+
+executable("app") {
+    sources = [
+        "//src/windowz.cpp",
+        "//src/main.cpp",
+    ]
+
+    include_dirs = [
+        "//inc"
+    ]
+    configs = [ ":wincfg" ]
+}

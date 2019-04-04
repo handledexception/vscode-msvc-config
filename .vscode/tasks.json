@@ -1,14 +1,55 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
+    // "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+
     "version": "2.0.0",
+    "options": {
+        "env": {
+            "DEBUG_OUTPATH_32": "${workspaceFolder}\\Debug\\x86",
+            "DEBUG_OUTPATH_64": "${workspaceFolder}\\Debug\\x64",
+            "LIBS": "user32.lib",
+            "TARGETNAME": "main",
+            "VCVARSALL32": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x86",
+            "VCVARSALL64": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x64"
+        }
+    },
     "tasks": [
+        {
+            "label": "ninja build x64",
+            "command": "cmd",
+            "type": "process",
+            "args": [
+                "/C %VCVARSALL64% && ninja -C out"
+            ],
+            "problemMatcher": [
+                "$msCompile"
+            ]
+        },
+        {
+            "label": "gn gen",
+            "command": "gn",
+            "type": "process",
+            "args": [
+                "gen", "out"
+            ]
+        },
+        {
+            "label": "gn clean",
+            "command": "gn",
+            "type": "process",
+            "args": [
+                "clean", "out"
+            ]
+        },
+        
         {
             "label": "MSVC Build Debug (32-bit)",
             "command": "cmd",
             "type": "process",
             "args": [
-                "/C %VCVARSALL32% && cl /Od /Zi /EHsc %LIBS% /Fd:%DEBUG_OUTPATH_32%/vc140.pdb /Fo:%DEBUG_OUTPATH_32%/%TARGETNAME%.obj ${workspaceFolder}/main.c /link /OUT:%DEBUG_OUTPATH_32%/%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_32%/%TARGETNAME%.pdb"
+                "/C %VCVARSALL32% && cl /EHsc /W3 /Od /Zi /D UNICODE %LIBS% /Fd:%DEBUG_OUTPATH_32%\\vc140.pdb /Fo:%DEBUG_OUTPATH_32%\\%TARGETNAME%.obj ${workspaceFolder}\\main.cpp /link /OUT:%DEBUG_OUTPATH_32%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_32%\\%TARGETNAME%.pdb"
+            ],
+            "problemMatcher": [
+                "$msCompile"
             ]
         },
         {
@@ -16,23 +57,26 @@
             "command": "cmd",
             "type": "process",
             "args": [
-                "/C %VCVARSALL64% && cl /Od /Zi /EHsc %LIBS% /Fd:%DEBUG_OUTPATH_64%/vc140.pdb /Fo:%DEBUG_OUTPATH_64%/%TARGETNAME%.obj ${workspaceFolder}/main.c /link /OUT:%DEBUG_OUTPATH_64%/%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%/%TARGETNAME%.pdb"
+                //"/C %VCVARSALL64% && cl /EHsc /W3 /Od /Zi /D \"UNICODE\" %LIBS% /Fd:%DEBUG_OUTPATH_64%\\vc140.pdb /Fo:%DEBUG_OUTPATH_64%\\%TARGETNAME%.obj ${workspaceFolder}\\main.cpp /link /OUT:%DEBUG_OUTPATH_64%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%\\%TARGETNAME%.pdb"
+                "/C %VCVARSALL64% && cl /EHsc /W3 /Od /Zi /D UNICODE %LIBS% /I${workspaceFolder}\\inc ${workspaceFolder}\\main.cpp ${workspaceFolder}\\src\\windowz.cpp /link /OUT:%DEBUG_OUTPATH_64%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%\\%TARGETNAME%.pdb"
             ],
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ]
         },
-        
         {
             "label": "GCC Build Debug (64-bit)",
             "type": "shell",
-            "command": "gcc",
+            "command": "g++",
             "args": [
-                "--std=c99",
+                "--std=c++11",
                 "-march=x86-64",
                 "-g",
-                "${workspaceFolder}/main.c",
+                "${workspaceFolder}/main.cpp",
                 "-o",
                 "${workspaceFolder}/main.exe"
             ],
@@ -40,15 +84,5 @@
                 "$msCompile"
             ]
         }
-    ],
-    "options": {
-        "env": {
-            "DEBUG_OUTPATH_32": "${workspaceFolder}/Debug/x86",
-            "DEBUG_OUTPATH_64": "${workspaceFolder}/Debug/x64",
-            "LIBS": "user32.lib",
-            "TARGETNAME": "main",
-            "VCVARSALL32": "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86",
-            "VCVARSALL64": "\"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x64"
-        }
-    }
+    ]
 }

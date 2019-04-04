@@ -1,0 +1,30 @@
+toolchain("msvc") {
+    cl = "cl.exe"
+    link = "link.exe"
+
+    my_cl_flags = "/nologo /showIncludes /EHsc /W3 /Od /Zi"
+    my_link_flags = "/nologo"
+
+    object_subdir = "{{target_out_dir}}/{{label_name}}"
+
+    tool("cxx") {
+        rspfile = "{{output}}.rsp"
+        pdbname = "{{target_out_dir}}/{{label_name}}_cc.pdb"
+        command = "$cl ${my_cl_flags} @$rspfile /c {{source}} /FS /Fo:{{output}} /Fd:\"$pdbname\""
+        depsformat = "msvc"
+        description = "MSVC CXX {{output}}"
+        outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
+        rspfile_content = "{{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}}"
+    }
+
+    tool("link") {
+        exename = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+        pdbname = "$exename.pdb"
+        default_output_extension = ".exe"
+        default_output_dir = "{{root_out_dir}}"
+        command = "$link ${my_link_flags} /OUT:$exename /PDB:$pdbname {{inputs}} {{libs}} {{solibs}} {{ldflags}}"
+        outputs = [
+            exename,            
+        ]
+    }
+}

@@ -28,7 +28,6 @@
             "externalConsole": true,
             "preLaunchTask": "MSVC Build Debug (64-bit)"
         },
-
         {
             "name": "GDB Debug (64-bit)",
             "type": "cppdbg",
