@@ -1,6 +1,9 @@
+// #define UNICODE
 #include <windows.h>
 #include <stdio.h>
 #include <stdint.h>
+
+#include "windowz.h"
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -18,7 +21,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return 0;
 }
 
-void FillWindowClass(WNDCLASSEX *wc, HINSTANCE instance, const char *wc_name, void *wndproc)
+void FillWindowClass(WNDCLASSEX *wc, HINSTANCE instance, const wchar_t *wc_name, WNDPROC wndproc)
 {
     wc->cbSize = sizeof(WNDCLASSEX);
     wc->style = 0;
@@ -42,8 +45,8 @@ int WINAPI WinMain(
 {
     HWND hwnd;
     MSG msg;
-    const char *appname = "My Application";
-    const char *window_title = "My Application";
+    const wchar_t *appname = L"My Application";
+    const wchar_t *window_title = L"My Application";
 
     WNDCLASSEX wc = { 0 };
     FillWindowClass(&wc, instance, appname, WndProc);
@@ -55,7 +58,7 @@ int WINAPI WinMain(
     hwnd = CreateWindowEx(
         WS_EX_CLIENTEDGE,
         appname,
-        "Window title",
+        window_title,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -70,7 +73,9 @@ int WINAPI WinMain(
         OutputDebugStringA("Error creating window");
         return -1;
     }
-
+    
+    Window *w = new Window(hwnd);
+    
     ShowWindow(hwnd, cmd_show);
     UpdateWindow(hwnd);
 
@@ -78,6 +83,6 @@ int WINAPI WinMain(
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    
-    return msg.wParam;
+        
+    return 0;
 }
