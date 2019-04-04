@@ -40,13 +40,13 @@
                 "clean", "out"
             ]
         },
-        
+
         {
             "label": "MSVC Build Debug (32-bit)",
             "command": "cmd",
             "type": "process",
             "args": [
-                "/C %VCVARSALL32% && cl /EHsc /W3 /Od /Zi /D UNICODE %LIBS% /Fd:%DEBUG_OUTPATH_32%\\vc140.pdb /Fo:%DEBUG_OUTPATH_32%\\%TARGETNAME%.obj ${workspaceFolder}\\main.cpp /link /OUT:%DEBUG_OUTPATH_32%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_32%\\%TARGETNAME%.pdb"
+                "/C %VCVARSALL32% && cl /EHsc /W3 /Od /Zi /D UNICODE /Fd:%DEBUG_OUTPATH_32%\\vc140.pdb %LIBS% /I${workspaceFolder}\\inc ${workspaceFolder}\\src\\main.cpp ${workspaceFolder}\\src\\windowz.cpp /link /OUT:%DEBUG_OUTPATH_32%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_32%\\%TARGETNAME%.pdb"
             ],
             "problemMatcher": [
                 "$msCompile"
@@ -58,7 +58,7 @@
             "type": "process",
             "args": [
                 //"/C %VCVARSALL64% && cl /EHsc /W3 /Od /Zi /D \"UNICODE\" %LIBS% /Fd:%DEBUG_OUTPATH_64%\\vc140.pdb /Fo:%DEBUG_OUTPATH_64%\\%TARGETNAME%.obj ${workspaceFolder}\\main.cpp /link /OUT:%DEBUG_OUTPATH_64%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%\\%TARGETNAME%.pdb"
-                "/C %VCVARSALL64% && cl /EHsc /W3 /Od /Zi /D UNICODE %LIBS% /I${workspaceFolder}\\inc ${workspaceFolder}\\main.cpp ${workspaceFolder}\\src\\windowz.cpp /link /OUT:%DEBUG_OUTPATH_64%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%\\%TARGETNAME%.pdb"
+                "/C %VCVARSALL64% && cl /EHsc /W3 /Od /Zi /D UNICODE /Fd:%DEBUG_OUTPATH_64%\\vc140.pdb %LIBS% /I${workspaceFolder}\\inc ${workspaceFolder}\\src\\main.cpp ${workspaceFolder}\\src\\windowz.cpp /link /OUT:%DEBUG_OUTPATH_64%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%\\%TARGETNAME%.pdb"
             ],
             "group": {
                 "kind": "build",
