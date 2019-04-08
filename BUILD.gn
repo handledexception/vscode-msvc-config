@@ -8,14 +8,19 @@ config("wincfg") {
     ]
 }
 
-executable("app") {
+executable("App") {
+    ldflags = [ 
+        "/DEBUG"
+    ]
+
     sources = [
-        "//src/windowz.cpp",
+        "//src/cwindow.cpp",
         "//src/main.cpp",
     ]
 
     include_dirs = [
         "//inc"
     ]
+    
     configs = [ ":wincfg" ]
 }
