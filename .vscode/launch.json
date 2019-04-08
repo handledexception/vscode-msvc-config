@@ -14,19 +14,19 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": true,
-            "preLaunchTask": "MSVC Build Debug (32-bit)"            
+            "preLaunchTask": "MSVC Build Debug (32-bit)"
         },
         {
             "name": "MSVC Debug (64-bit)",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/Debug/x64/main.exe",
+            "program": "${workspaceFolder}/out/App.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true,
-            "preLaunchTask": "MSVC Build Debug (64-bit)"
+            "externalConsole": false,
+            //"preLaunchTask": "ninja build x64"
         },
         {
             "name": "GDB Debug (64-bit)",
@@ -49,5 +49,5 @@
             ],
             "preLaunchTask": "GCC Build Debug"
         }
-    ]    
+    ]
 }
