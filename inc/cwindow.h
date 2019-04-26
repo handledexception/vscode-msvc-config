@@ -12,6 +12,7 @@ private:
     static LRESULT CALLBACK staticWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
     LRESULT wndProc(UINT msg, WPARAM wparam, LPARAM lparam);
     static HWND createHwnd(CWindow *self, int32_t width, int32_t height);
+    void initializeMenus();
 
 private:
     unsigned int m_Width, m_Height;

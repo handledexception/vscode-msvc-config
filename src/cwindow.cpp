@@ -3,6 +3,9 @@
 #include "cwindow.h"
 
 #define WND_CLASS_NAME L"My Application"
+#define IDM_FILE_NEW 1
+#define IDM_FILE_OPEN 2
+#define IDM_FILE_QUIT 3
 
 CWindow::CWindow(int32_t width, int32_t height)
 {
@@ -72,11 +75,32 @@ HWND CWindow::createHwnd(CWindow *self, int32_t width, int32_t height)
     return hwnd;
 }
 
+void CWindow::initializeMenus() {
+    HMENU hMenubar = CreateMenu();
+    HMENU hMenu = CreateMenu();
+
+    AppendMenuW(hMenu, MF_STRING, IDM_FILE_NEW, L"&New");
+    AppendMenuW(hMenu, MF_STRING, IDM_FILE_OPEN, L"&Open");
+    AppendMenuW(hMenu, MF_SEPARATOR, 0, NULL);
+    AppendMenuW(hMenu, MF_STRING, IDM_FILE_QUIT, L"&Quit");
+
+    AppendMenuW(hMenubar, MF_POPUP, (UINT_PTR) hMenu, L"&File");
+    SetMenu(m_Hwnd, hMenubar);
+}
+
 LRESULT CWindow::wndProc(UINT msg, WPARAM wparam, LPARAM lparam)
 {
     switch (msg) {
         case WM_CREATE:
             OutputDebugString(L"Creating window...");
+            this->initializeMenus();
+            break;
+        case WM_COMMAND:
+            switch(LOWORD(wparam)) {
+                case IDM_FILE_QUIT:
+                    PostMessage(m_Hwnd, WM_CLOSE, 0, 0);
+                    break;
+            }
             break;
         case WM_CLOSE:
             DestroyWindow(m_Hwnd);
