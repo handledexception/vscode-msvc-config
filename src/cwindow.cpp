@@ -42,7 +42,7 @@ void CWindow::registerClass()
     wcex.hInstance     = instance;
     wcex.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
     wcex.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
     wcex.lpszMenuName  = nullptr;
     wcex.lpszClassName = WND_CLASS_NAME;
     wcex.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
@@ -88,12 +88,12 @@ void CWindow::initializeMenus() {
     SetMenu(m_Hwnd, hMenubar);
 }
 
-LRESULT CWindow::wndProc(UINT msg, WPARAM wparam, LPARAM lparam)
+LRESULT CWindow::wndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     switch (msg) {
         case WM_CREATE:
             OutputDebugString(L"Creating window...");
-            this->initializeMenus();
+            initializeMenus();
             break;
         case WM_COMMAND:
             switch(LOWORD(wparam)) {
@@ -134,7 +134,8 @@ LRESULT CALLBACK CWindow::staticWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPAR
     }
 
     if (wnd) {
-        return wnd->wndProc(msg, wparam, lparam);
+        wnd->m_Hwnd = hwnd;
+        return wnd->wndProc(hwnd, msg, wparam, lparam);
     }
     else {
         return DefWindowProc(hwnd, msg, wparam, lparam);

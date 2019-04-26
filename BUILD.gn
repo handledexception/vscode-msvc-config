@@ -1,5 +1,5 @@
 #TODO:
-# - setup builds for Release and Debug, x86 and x64
+# - separate out folders for Release/Debug and x86/x64
 
 config("wincfg") {
     defines = [ "UNICODE" ]

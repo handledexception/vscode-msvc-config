@@ -12,9 +12,13 @@ int WINAPI WinMain(
 {
     CWindow *w = new CWindow(640, 480);
     HWND handle = w->Handle();
+    // CWindow *w2 = new CWindow(800, 600);
+    // HWND handle2 = w2->Handle();
 
     ShowWindow(handle, SW_SHOWNORMAL);
     UpdateWindow(handle);
+    // ShowWindow(handle2, SW_SHOWNORMAL);
+    // UpdateWindow(handle2);
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0) > 0) {
