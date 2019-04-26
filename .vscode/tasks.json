@@ -22,14 +22,19 @@
             ],
             "problemMatcher": [
                 "$msCompile"
-            ]
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "gn gen",
             "command": "gn",
             "type": "process",
             "args": [
-                "gen", "out"
+                "gen",
+                "out"
             ]
         },
         {
@@ -37,10 +42,10 @@
             "command": "gn",
             "type": "process",
             "args": [
-                "clean", "out"
+                "clean",
+                "out"
             ]
         },
-
         {
             "label": "MSVC Build Debug (32-bit)",
             "command": "cmd",
@@ -57,13 +62,9 @@
             "command": "cmd",
             "type": "process",
             "args": [
-                //"/C %VCVARSALL64% && cl /EHsc /W3 /Od /Zi /D \"UNICODE\" %LIBS% /Fd:%DEBUG_OUTPATH_64%\\vc140.pdb /Fo:%DEBUG_OUTPATH_64%\\%TARGETNAME%.obj ${workspaceFolder}\\main.cpp /link /OUT:%DEBUG_OUTPATH_64%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%\\%TARGETNAME%.pdb"
                 "/C %VCVARSALL64% && cl /EHsc /W3 /Od /Zi /D UNICODE /Fd:%DEBUG_OUTPATH_64%\\vc140.pdb %LIBS% /I${workspaceFolder}\\inc ${workspaceFolder}\\src\\main.cpp ${workspaceFolder}\\src\\cwindow.cpp /link /OUT:%DEBUG_OUTPATH_64%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%\\%TARGETNAME%.pdb"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "problemMatcher": [
                 "$msCompile"
             ]
