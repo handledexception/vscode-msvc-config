@@ -7,17 +7,13 @@
 #define IDM_FILE_OPEN 2
 #define IDM_FILE_QUIT 3
 
-CWindow::CWindow(int32_t width, int32_t height)
+CWindow::CWindow(int32_t width, int32_t height, const wchar_t *title)
 :
 mWidth(width),
 mHeight(height),
 mHwnd(nullptr)
 {
-    //registerClass();
-
-    mHwnd = createHwnd(this, width, height);
-
-    // initializeMenus();
+    mHwnd = createHwnd(this, width, height, title);
 
     SetWindowLongPtr(mHwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }
@@ -41,43 +37,13 @@ void CWindow::Show(bool show)
     UpdateWindow(mHwnd);
 }
 
-// void CWindow::registerClass()
-// {
-//     HMODULE instance = GetModuleHandle(nullptr);
-
-//     WNDCLASSEX wcex;
-
-//     // window already registered
-//     if (GetClassInfoEx(instance, WND_CLASS_NAME, &wcex)) {
-//         return;
-//     }
-
-//     wcex.cbSize        = sizeof(WNDCLASSEX);
-//     wcex.style         = CS_DBLCLKS;
-//     wcex.lpfnWndProc   = &CWindow::staticWndProc;
-//     wcex.cbClsExtra    = 0;
-//     wcex.cbWndExtra    = 0;
-//     wcex.hInstance     = instance;
-//     wcex.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
-//     wcex.hCursor       = LoadCursor(NULL, IDC_ARROW);
-//     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
-//     wcex.lpszMenuName  = nullptr;
-//     wcex.lpszClassName = WND_CLASS_NAME;
-//     wcex.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
-
-//     if (RegisterClassEx(&wcex) == 0) {
-//         OutputDebugString(L"Error registering window class!");
-//         return;
-//     }
-// }
-
-HWND CWindow::createHwnd(CWindow *self, int32_t width, int32_t height)
+HWND CWindow::createHwnd(CWindow *self, int32_t width, int32_t height, const wchar_t *title)
 {
     OutputDebugString(L"Creating window...\n");
     HWND hwnd = CreateWindowEx(
         WS_EX_APPWINDOW,
         WND_CLASS_NAME,
-        L"",
+        title,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         width, height,
@@ -131,32 +97,3 @@ LRESULT CWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
     return DefWindowProc(mHwnd, msg, wparam, lparam);
 }
-
-// LRESULT CALLBACK CWindow::staticWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-// {
-//     CWindow *wnd = nullptr;
-//     if (msg == WM_CREATE) {
-//         wnd = reinterpret_cast<CWindow *>(
-//             reinterpret_cast<LPCREATESTRUCT>(lparam)->lpCreateParams
-//         );
-
-//         if (wnd && wnd->mHwnd == nullptr) {
-//             wnd->mHwnd = hwnd;
-//         }
-//     }
-//     else {
-//         wnd = reinterpret_cast<CWindow *>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-
-//         if (wnd && wnd->mHwnd != hwnd) {
-//             wnd = nullptr;
-//         }
-//     }
-
-//     if (wnd) {
-//         wnd->mHwnd = hwnd;
-//         return wnd->wndProc(hwnd, msg, wparam, lparam);
-//     }
-//     else {
-//         return DefWindowProc(hwnd, msg, wparam, lparam);
-//     }
-// }

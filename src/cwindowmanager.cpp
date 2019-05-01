@@ -44,6 +44,14 @@ void CWindowManager::AddChildWindow(CWindow *window)
     mChildWindows.push_back(window);
 }
 
+void CWindowManager::FreeChildWindows()
+{
+    for (auto w : mChildWindows) {
+        delete w;
+        w = nullptr;
+    }
+}
+
 LRESULT CWindowManager::ChildWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     for (auto w : mChildWindows) {
@@ -57,7 +65,6 @@ LRESULT CWindowManager::ChildWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPAR
 
 void CWindowManager::createDummyWindow()
 {
-    const wchar_t *dummyName = L"MyAppDummy";
     gDummyWindow = ::CreateWindow(mAppName, L"", WS_OVERLAPPEDWINDOW, -100, -100, 10, 10, 0, 0, mInstance, 0);
     ::SetWindowLongPtr(gDummyWindow, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }

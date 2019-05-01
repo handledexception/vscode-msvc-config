@@ -13,8 +13,9 @@ public:
     ~CWindowManager() { };
     void DoRegisterClass();
     void AddChildWindow(CWindow *window);
+    void FreeChildWindows();
     LRESULT ChildWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
-    
+
 private:
     void createDummyWindow();
     static LRESULT CALLBACK staticWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

@@ -14,7 +14,7 @@ int WINAPI WinMain(
     CWindowManager *mgr = new CWindowManager(hInstance, L"My Application");
      mgr->DoRegisterClass();
 
-    CWindow *w = new CWindow(800, 600);
+    CWindow *w = new CWindow(800, 600, L"Default Window");
     w->Show(true);
 
     mgr->AddChildWindow(w);
@@ -24,6 +24,10 @@ int WINAPI WinMain(
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    mgr->FreeChildWindows();
+    delete mgr;
+    mgr = nullptr;
 
     return 0;
 }
