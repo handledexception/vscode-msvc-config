@@ -15,10 +15,12 @@ executable("App") {
 
     sources = [
         "//src/cwindow.cpp",
+        "//src/cwindowmanager.cpp",
         "//src/main.cpp",
     ]
 
     include_dirs = [
+        "//src",
         "//inc"
     ]
     

@@ -8,50 +8,66 @@
 #define IDM_FILE_QUIT 3
 
 CWindow::CWindow(int32_t width, int32_t height)
+:
+mWidth(width), mHeight(height)
 {
-    registerClass();
+    //registerClass();
 
-    m_Hwnd = createHwnd(this, width, height);
+    mHwnd = createHwnd(this, width, height);
 
-    SetWindowLongPtr(m_Hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+    initializeMenus();
+
+    SetWindowLongPtr(mHwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }
 
 CWindow::~CWindow()
 {
-    if (m_Hwnd) {
-        DestroyWindow(m_Hwnd);
+    if (mHwnd) {
+        DestroyWindow(mHwnd);
     }
 }
 
-void CWindow::registerClass()
+void CWindow::Show(bool show)
 {
-    HMODULE instance = GetModuleHandle(nullptr);
-
-    WNDCLASSEX wcex;
-
-    // window already registered
-    if (GetClassInfoEx(instance, WND_CLASS_NAME, &wcex)) {
-        return;
+    if (show == true) {
+        ShowWindowAsync(mHwnd, SW_SHOWNORMAL);
+    }
+    else {
+        ShowWindowAsync(mHwnd, SW_HIDE);
     }
 
-    wcex.cbSize        = sizeof(WNDCLASSEX);
-    wcex.style         = CS_DBLCLKS;
-    wcex.lpfnWndProc   = &CWindow::staticWndProc;
-    wcex.cbClsExtra    = 0;
-    wcex.cbWndExtra    = 0;
-    wcex.hInstance     = instance;
-    wcex.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
-    wcex.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
-    wcex.lpszMenuName  = nullptr;
-    wcex.lpszClassName = WND_CLASS_NAME;
-    wcex.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
-
-    if (RegisterClassEx(&wcex) == 0) {
-        OutputDebugString(L"Error registering window class!");
-        return;
-    }
+    UpdateWindow(mHwnd);
 }
+
+// void CWindow::registerClass()
+// {
+//     HMODULE instance = GetModuleHandle(nullptr);
+
+//     WNDCLASSEX wcex;
+
+//     // window already registered
+//     if (GetClassInfoEx(instance, WND_CLASS_NAME, &wcex)) {
+//         return;
+//     }
+
+//     wcex.cbSize        = sizeof(WNDCLASSEX);
+//     wcex.style         = CS_DBLCLKS;
+//     wcex.lpfnWndProc   = &CWindow::staticWndProc;
+//     wcex.cbClsExtra    = 0;
+//     wcex.cbWndExtra    = 0;
+//     wcex.hInstance     = instance;
+//     wcex.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+//     wcex.hCursor       = LoadCursor(NULL, IDC_ARROW);
+//     wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
+//     wcex.lpszMenuName  = nullptr;
+//     wcex.lpszClassName = WND_CLASS_NAME;
+//     wcex.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
+
+//     if (RegisterClassEx(&wcex) == 0) {
+//         OutputDebugString(L"Error registering window class!");
+//         return;
+//     }
+// }
 
 HWND CWindow::createHwnd(CWindow *self, int32_t width, int32_t height)
 {
@@ -76,68 +92,69 @@ HWND CWindow::createHwnd(CWindow *self, int32_t width, int32_t height)
 }
 
 void CWindow::initializeMenus() {
-    HMENU hMenubar = CreateMenu();
-    HMENU hMenu = CreateMenu();
+    HMENU hMenubar = ::CreateMenu();
+    HMENU hMenu = ::CreateMenu();
 
-    AppendMenuW(hMenu, MF_STRING, IDM_FILE_NEW, L"&New");
-    AppendMenuW(hMenu, MF_STRING, IDM_FILE_OPEN, L"&Open");
-    AppendMenuW(hMenu, MF_SEPARATOR, 0, NULL);
-    AppendMenuW(hMenu, MF_STRING, IDM_FILE_QUIT, L"&Quit");
+    ::AppendMenuW(hMenu, MF_STRING, IDM_FILE_NEW, L"&New");
+    ::AppendMenuW(hMenu, MF_STRING, IDM_FILE_OPEN, L"&Open");
+    ::AppendMenuW(hMenu, MF_SEPARATOR, 0, NULL);
+    ::AppendMenuW(hMenu, MF_STRING, IDM_FILE_QUIT, L"&Quit");
 
-    AppendMenuW(hMenubar, MF_POPUP, (UINT_PTR) hMenu, L"&File");
-    SetMenu(m_Hwnd, hMenubar);
+    ::AppendMenuW(hMenubar, MF_POPUP, (UINT_PTR) hMenu, L"&File");
+    ::SetMenu(mHwnd, hMenubar);
+    ::DrawMenuBar(mHwnd);
 }
 
-LRESULT CWindow::wndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+LRESULT CWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     switch (msg) {
         case WM_CREATE:
             OutputDebugString(L"Creating window...");
-            initializeMenus();
+            // initializeMenus();
             break;
         case WM_COMMAND:
             switch(LOWORD(wparam)) {
                 case IDM_FILE_QUIT:
-                    PostMessage(m_Hwnd, WM_CLOSE, 0, 0);
+                    PostMessage(mHwnd, WM_CLOSE, 0, 0);
                     break;
             }
             break;
         case WM_CLOSE:
-            DestroyWindow(m_Hwnd);
+            DestroyWindow(mHwnd);
             break;
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
     }
 
-    return DefWindowProc(m_Hwnd, msg, wparam, lparam);
+    return DefWindowProc(mHwnd, msg, wparam, lparam);
 }
 
-LRESULT CALLBACK CWindow::staticWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-    CWindow *wnd = nullptr;
-    if (msg == WM_CREATE) {
-        wnd = reinterpret_cast<CWindow *>(
-            reinterpret_cast<LPCREATESTRUCT>(lparam)->lpCreateParams
-        );
+// LRESULT CALLBACK CWindow::staticWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+// {
+//     CWindow *wnd = nullptr;
+//     if (msg == WM_CREATE) {
+//         wnd = reinterpret_cast<CWindow *>(
+//             reinterpret_cast<LPCREATESTRUCT>(lparam)->lpCreateParams
+//         );
 
-        if (wnd && wnd->m_Hwnd == nullptr) {
-            wnd->m_Hwnd = hwnd;
-        }
-    }
-    else {
-        wnd = reinterpret_cast<CWindow *>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+//         if (wnd && wnd->mHwnd == nullptr) {
+//             wnd->mHwnd = hwnd;
+//         }
+//     }
+//     else {
+//         wnd = reinterpret_cast<CWindow *>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
-        if (wnd && wnd->m_Hwnd != hwnd) {
-            wnd = nullptr;
-        }
-    }
+//         if (wnd && wnd->mHwnd != hwnd) {
+//             wnd = nullptr;
+//         }
+//     }
 
-    if (wnd) {
-        wnd->m_Hwnd = hwnd;
-        return wnd->wndProc(hwnd, msg, wparam, lparam);
-    }
-    else {
-        return DefWindowProc(hwnd, msg, wparam, lparam);
-    }
-}
+//     if (wnd) {
+//         wnd->mHwnd = hwnd;
+//         return wnd->wndProc(hwnd, msg, wparam, lparam);
+//     }
+//     else {
+//         return DefWindowProc(hwnd, msg, wparam, lparam);
+//     }
+// }

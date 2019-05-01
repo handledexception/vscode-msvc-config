@@ -3,22 +3,21 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "cwindow.h"
+#include "cwindowmanager.h"
 
 int WINAPI WinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
     LPSTR cmdLine,
     int cmdShow)
-{
-    CWindow *w = new CWindow(640, 480);
-    HWND handle = w->Handle();
-    // CWindow *w2 = new CWindow(800, 600);
-    // HWND handle2 = w2->Handle();
+{    
+    CWindowManager *mgr = new CWindowManager(hInstance, L"My Application");
+     mgr->DoRegisterClass();
 
-    ShowWindow(handle, SW_SHOWNORMAL);
-    UpdateWindow(handle);
-    // ShowWindow(handle2, SW_SHOWNORMAL);
-    // UpdateWindow(handle2);
+    CWindow *w = new CWindow(800, 600);
+    w->Show(true);
+
+    mgr->AddChildWindow(w);
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0) > 0) {
