@@ -64,6 +64,16 @@ void CWindowManager::createDummyWindow()
 
 LRESULT CALLBACK CWindowManager::staticWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+    if (msg == WM_CREATE) {
+        CWindow *wnd = reinterpret_cast<CWindow *>(
+            reinterpret_cast<LPCREATESTRUCT>(lparam)->lpCreateParams
+        );
+        if (wnd && wnd->Handle() == nullptr) {
+            wnd->SetHandle(hwnd);
+            return wnd->WndProc(hwnd, msg, wparam, lparam);
+        }
+    }
+
     CWindowManager *mgr = reinterpret_cast<CWindowManager *>(::GetWindowLongPtr(gDummyWindow, GWLP_USERDATA));
     if (mgr) {
         return mgr->ChildWindowProc(hwnd, msg, wparam, lparam);

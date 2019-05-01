@@ -9,13 +9,15 @@
 
 CWindow::CWindow(int32_t width, int32_t height)
 :
-mWidth(width), mHeight(height)
+mWidth(width),
+mHeight(height),
+mHwnd(nullptr)
 {
     //registerClass();
 
     mHwnd = createHwnd(this, width, height);
 
-    initializeMenus();
+    // initializeMenus();
 
     SetWindowLongPtr(mHwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 }
@@ -110,7 +112,7 @@ LRESULT CWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     switch (msg) {
         case WM_CREATE:
             OutputDebugString(L"Creating window...");
-            // initializeMenus();
+            initializeMenus();
             break;
         case WM_COMMAND:
             switch(LOWORD(wparam)) {
