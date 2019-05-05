@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "cwindow.h"
+#include "cmainwindow.h"
 #include "cwindowmanager.h"
 
 int WINAPI WinMain(
@@ -10,14 +11,16 @@ int WINAPI WinMain(
     HINSTANCE hPrevInstance,
     LPSTR cmdLine,
     int cmdShow)
-{    
+{
     CWindowManager *mgr = new CWindowManager(hInstance, L"My Application");
      mgr->DoRegisterClass();
 
-    CWindow *w = new CWindow(800, 600, L"Default Window");
-    w->Show(true);
+    CMainWindow *mw = new CMainWindow(800, 600, L"Default Window", nullptr);
+    //CWindow *w2 = new CWindow(320, 240, nullptr, mw->Handle());
+    mw->Show(true);
+    //w2->Show(true);
 
-    mgr->AddChildWindow(w);
+    mgr->AddChildWindow(mw);
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0) > 0) {

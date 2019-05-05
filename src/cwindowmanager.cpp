@@ -19,7 +19,7 @@ void CWindowManager::DoRegisterClass()
     }
 
     wcex.cbSize        = sizeof(WNDCLASSEX);
-    wcex.style         = CS_DBLCLKS;
+    wcex.style         = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc   = &CWindowManager::staticWndProc;
     wcex.cbClsExtra    = 0;
     wcex.cbWndExtra    = 0;

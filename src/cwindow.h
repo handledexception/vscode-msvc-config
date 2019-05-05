@@ -3,21 +3,23 @@
 #include <windows.h>
 #include <cstdint>
 
+#define WND_CLASS_NAME L"My Application"
+
 class CWindow {
 
-public:
-    CWindow(int32_t width, int32_t height, const wchar_t *title);
+public:    
+    CWindow(int32_t width, int32_t height, const wchar_t *title, HWND parent);
     ~CWindow();
     HWND Handle() { return mHwnd; }
     void SetHandle(HWND hwnd) { mHwnd = hwnd; }
     void Show(bool show);
-    LRESULT WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+    virtual LRESULT WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) = 0;
 
 private:
-    HWND createHwnd(CWindow *self, int32_t width, int32_t height, const wchar_t *title);
-    void initializeMenus();
+    virtual HWND createHwnd(CWindow *self, int32_t width, int32_t height, const wchar_t *title, HWND parent) = 0;
+  //  void initializeMenus();
 
-private:
+protected:
     unsigned int mWidth, mHeight;
     HWND mHwnd;
 };

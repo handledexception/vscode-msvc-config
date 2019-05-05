@@ -15,6 +15,7 @@ executable("App") {
 
     sources = [
         "//src/cwindow.cpp",
+        "//src/cmainwindow.cpp",
         "//src/cwindowmanager.cpp",
         "//src/main.cpp",
     ]
