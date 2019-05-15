@@ -1,36 +1,29 @@
 // #define UNICODE
 #include <windows.h>
 #include <stdio.h>
-#include <stdint.h>
-#include "cwindow.h"
-#include "cmainwindow.h"
-#include "cwindowmanager.h"
+#include <cstdint>
 
-int WINAPI WinMain(
-    HINSTANCE hInstance,
-    HINSTANCE hPrevInstance,
-    LPSTR cmdLine,
-    int cmdShow)
+#include "PMainWindow.h"
+#include "PWindow.h"
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, int cmdShow)
 {
-    CWindowManager *mgr = new CWindowManager(hInstance, L"My Application");
-     mgr->DoRegisterClass();
-
-    CMainWindow *mw = new CMainWindow(800, 600, L"Default Window", nullptr);
-    //CWindow *w2 = new CWindow(320, 240, nullptr, mw->Handle());
-    mw->Show(true);
-    //w2->Show(true);
-
-    mgr->AddChildWindow(mw);
+    PMainWindow* pwnd = new PMainWindow(L"PaulApp", 1280, 800, hInstance, nullptr);
+    pwnd->Init(
+        WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW, /* ex style */
+        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN	  /* style */
+    );
+	pwnd->Show(true);
+    
+	PWindow* pwny = new PWindow(L"PaulSubWindow", 640, 360, hInstance, pwnd->GetHandle());
+    pwny->Init(WS_EX_OVERLAPPEDWINDOW, WS_CHILD | WS_CLIPCHILDREN);
+	pwny->Show(true);
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0) > 0) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-
-    mgr->FreeChildWindows();
-    delete mgr;
-    mgr = nullptr;
 
     return 0;
 }
