@@ -1,0 +1,34 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskName": "Ninja Build",
+      "appliesTo": "*.gn",
+      "type": "default",
+      "command": "${env.COMSPEC}",
+      "args": [
+        "/C", "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\"", "x86_amd64",
+        "&",
+        "ninja", "-C", "out"
+      ]
+    },
+    {
+      "taskName": "Gn Clean",
+      "appliesTo": "*.gn",
+      "type": "default",
+      "command": "${env.COMSPEC}",
+      "args": [
+        "gn", "clean", "out"
+      ]
+    },
+    {
+      "taskName": "Gn Gen",
+      "appliesTo": "*.gn",
+      "type": "default",
+      "command": "${env.COMSPEC}",
+      "args": [
+        "gn", "gen", "out"
+      ]
+    }
+  ]
+}

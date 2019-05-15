@@ -1,0 +1,12 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "name": "C:\\Users\\paulh\\source\\repos\\chartest",
+      "externalConsole": false,
+      "program": "${workspaceRoot}\\Debug\\MyApp.exe",
+      "type": "native"
+    }
+  ]
+}

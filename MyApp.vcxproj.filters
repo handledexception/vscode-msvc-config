@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PMainWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\PMainWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".vscode\ipch\136f89c489ab4e3e\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\1ece95edc474c88e\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\21053b5965d56cce\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\285600e3d2e8556b\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\2a6c9f05acd19b5e\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\5ac0cb1a13387e36\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\6321cac9957457cb\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\670883483d04a7bb\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\81f24088f63dfb63\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\89b204fc217cac3e\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\a208093e8399a32\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\a896887927becd16\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\bee0235323fa12e\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\bf42772017768c14\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\db0945a6d9e73bc6\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\dcdd523168f32b7b\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\e31cb08a7d09b53b\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\eb623fbf8ad4a023\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\ec0a16e34c61427e\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".vscode\ipch\f231103857f4b514\mmap_address.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
