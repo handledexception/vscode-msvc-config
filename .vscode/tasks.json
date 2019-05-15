@@ -51,7 +51,7 @@
             "command": "cmd",
             "type": "process",
             "args": [
-                "/C %VCVARSALL32% && cl /EHsc /W3 /Od /Zi /D UNICODE /Fd:%DEBUG_OUTPATH_32%\\vc140.pdb %LIBS% /I${workspaceFolder}\\inc ${workspaceFolder}\\src\\main.cpp ${workspaceFolder}\\src\\cwindow.cpp /link /OUT:%DEBUG_OUTPATH_32%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_32%\\%TARGETNAME%.pdb"
+                "/C %VCVARSALL32% && cl /EHsc /W3 /Od /Zi /D UNICODE /Fd:%DEBUG_OUTPATH_32%\\vc142.pdb %LIBS% /I${workspaceFolder}\\inc ${workspaceFolder}\\src\\main.cpp ${workspaceFolder}\\src\\PWindow.cpp ${workspaceFolder}\\src\\PMainWindow.cpp /link /OUT:%DEBUG_OUTPATH_32%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_32%\\%TARGETNAME%.pdb"
             ],
             "problemMatcher": [
                 "$msCompile"
@@ -62,7 +62,7 @@
             "command": "cmd",
             "type": "process",
             "args": [
-                "/C %VCVARSALL64% && cl /EHsc /W3 /Od /Zi /D UNICODE /Fd:%DEBUG_OUTPATH_64%\\vc140.pdb %LIBS% /I${workspaceFolder}\\inc ${workspaceFolder}\\src\\main.cpp ${workspaceFolder}\\src\\cwindow.cpp /link /OUT:%DEBUG_OUTPATH_64%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%\\%TARGETNAME%.pdb"
+                "/C %VCVARSALL64% && cl /EHsc /W3 /Od /Zi /D UNICODE /Fd:%DEBUG_OUTPATH_64%\\vc142.pdb %LIBS% /I${workspaceFolder}\\inc ${workspaceFolder}\\src\\main.cpp ${workspaceFolder}\\src\\PWindow.cpp ${workspaceFolder}\\src\\PMainWindow.cpp /link /OUT:%DEBUG_OUTPATH_64%\\%TARGETNAME%.exe /PDB:%DEBUG_OUTPATH_64%\\%TARGETNAME%.pdb"
             ],
             "group": "build",
             "problemMatcher": [
