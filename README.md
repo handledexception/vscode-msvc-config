@@ -1,6 +1,8 @@
 Example setup for building a C/C++ program in VSCode using the MSVC build tools or GN/Ninja.
 I've provided a basic tasks.json and launch.json to build a single source file program.
 
+This project is also my playground for learning Win32 GUI programming.
+
 VSCode setup was taken from a VSCode Github issues thread: https://github.com/Microsoft/vscode-cpptools/issues/1839
 
 1. Make sure you have Microsoft Visual Studio or the MS Build tools installed
