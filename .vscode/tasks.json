@@ -8,8 +8,8 @@
             "DEBUG_OUTPATH_64": "${workspaceFolder}\\Debug\\x64",
             "LIBS": "user32.lib",
             "TARGETNAME": "main",
-            "VCVARSALL32": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x86",
-            "VCVARSALL64": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x64"
+            "VCVARSALL32": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x86",
+            "VCVARSALL64": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat\" x86_amd64"
         }
     },
     "tasks": [
