@@ -4,6 +4,7 @@
 #define IDM_FILE_NEW 1
 #define IDM_FILE_OPEN 2
 #define IDM_FILE_QUIT 3
+#define IDM_HELP_ABOUT 4
 
 PMainWindow::PMainWindow(wchar_t* title, uint32_t width, uint32_t height, HINSTANCE hinst, HWND parent)
 :
@@ -31,6 +32,10 @@ LRESULT PMainWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 					OutputDebugString(L"IDM_FILE_QUIT\n");
                     PostMessage(mHwnd, WM_CLOSE, 0, 0);
                     break;
+				case IDM_HELP_ABOUT:
+					auto res = MessageBox(mHwnd, L"About my app", L"About", 1 | MB_ICONINFORMATION);
+					OutputDebugString(L"CMainWindow::WndProc -> IDM_HELP_ABOUT");
+					break;
             }
             break;
         case WM_CLOSE:
@@ -47,14 +52,20 @@ LRESULT PMainWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 void PMainWindow::install_menubar()
 {
     HMENU hMenubar = ::CreateMenu();
-    HMENU hMenu = ::CreateMenu();
+    HMENU hFileMenu = ::CreateMenu();
+	HMENU hHelpMenu = ::CreateMenu();
+    
+	::AppendMenu(hFileMenu, MF_STRING, IDM_FILE_NEW, L"&New");
+    ::AppendMenu(hFileMenu, MF_STRING, IDM_FILE_OPEN, L"&Open");
+    ::AppendMenu(hFileMenu, MF_SEPARATOR, 0, NULL);
+    ::AppendMenu(hFileMenu, MF_STRING, IDM_FILE_QUIT, L"&Quit");
 
-    ::AppendMenuW(hMenu, MF_STRING, IDM_FILE_NEW, L"&New");
-    ::AppendMenuW(hMenu, MF_STRING, IDM_FILE_OPEN, L"&Open");
-    ::AppendMenuW(hMenu, MF_SEPARATOR, 0, NULL);
-    ::AppendMenuW(hMenu, MF_STRING, IDM_FILE_QUIT, L"&Quit");
+	::AppendMenu(hHelpMenu, MF_STRING, IDM_HELP_ABOUT, L"&About");
 
-    ::AppendMenuW(hMenubar, MF_POPUP, (UINT_PTR)hMenu, L"&File");
-    ::SetMenu(mHwnd, hMenubar);
-    ::DrawMenuBar(mHwnd);
+    ::AppendMenu(hMenubar, MF_POPUP, (UINT_PTR)hFileMenu, L"&File");
+	::AppendMenu(hMenubar, MF_POPUP, (UINT_PTR)hHelpMenu, L"&Help");
+    
+	::SetMenu(mHwnd, hMenubar);
+    
+	::DrawMenuBar(mHwnd);
 }

@@ -70,6 +70,10 @@ LRESULT CALLBACK PWindow::static_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPA
         return wnd->WndProc(hwnd, msg, wparam, lparam);
     }
 
+	if (msg == WM_CLOSE) {
+		OutputDebugString(L"PWindow::static_wndproc -> WM_CLOSE");
+	}
+
     PWindow* wnd = reinterpret_cast<PWindow*>(::GetWindowLongPtr(hwnd, GWLP_USERDATA));
     if (wnd) {
     	wnd->SetHandle(hwnd);

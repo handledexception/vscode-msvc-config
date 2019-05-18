@@ -24,12 +24,18 @@
     <ClCompile Include="src\PMainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\PGraphics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PMainWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PGraphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

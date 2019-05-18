@@ -80,6 +80,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -104,10 +105,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\PGraphics.cpp" />
     <ClCompile Include="src\PMainWindow.cpp" />
     <ClCompile Include="src\PWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\PGraphics.h" />
     <ClInclude Include="src\PMainWindow.h" />
     <ClInclude Include="src\PWindow.h" />
   </ItemGroup>

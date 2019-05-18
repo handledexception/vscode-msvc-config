@@ -5,9 +5,12 @@
 
 #include "PMainWindow.h"
 #include "PWindow.h"
+#include "PGraphics.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, int cmdShow)
 {
+	gfx_device* gfx_dev = new gfx_device(0);
+	
     PMainWindow* pwnd = new PMainWindow(L"PaulApp", 1280, 800, hInstance, nullptr);
     pwnd->Init(
         WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW, /* ex style */
@@ -24,6 +27,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+	delete pwny;
+	pwny = nullptr;
+	delete pwnd;
+	pwnd = nullptr;
 
     return 0;
 }
