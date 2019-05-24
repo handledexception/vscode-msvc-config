@@ -16,6 +16,12 @@ using Microsoft::WRL::ComPtr;
 typedef struct gfx_swapchain gfx_swapchain_t;
 typedef struct gfx_device gfx_device_t;
 
+struct gfx_video_info {
+	uint32_t canvas_width;
+	uint32_t canvas_height;
+	uint32_t adapter_index;
+};
+
 struct gfx_swapchain {
 	HWND hwnd;
 	DXGI_SWAP_CHAIN_DESC swap_desc;
@@ -35,3 +41,6 @@ struct gfx_device {
 	gfx_device(uint32_t adapter_idx);
 	~gfx_device();
 };
+
+void enumerate_monitors();
+void enumerate_adapters();
