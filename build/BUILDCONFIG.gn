@@ -1,3 +1,9 @@
+# Specify args at the command line with:
+# gn gen out --args="is_debug=false"
+declare_args() {
+  is_debug = true
+}
+
 if (target_os == "") {
   target_os = host_os
 }
@@ -9,6 +15,32 @@ if (current_cpu == "") {
 }
 if (current_os == "") {
   current_os = target_os
+}
+
+is_windows = target_os == "win"
+
+is_x64 = target_cpu == "x64"
+
+  if (is_debug) {
+    default_output_dir = "Debug"
+  } else {
+    default_output_dir = "Release"
+  }
+
+set_defaults("executable") {
+  configs = [
+    "//build:compiler_defaults",
+    "//build:default_libs",
+    "//build:linker_defaults",
+  ]
+}
+
+set_defaults("shared_library") {
+  configs = [
+    "//build:compiler_defaults",
+    "//build:default_libs",
+    "//build:linker_defaults",
+  ]
 }
 
 set_default_toolchain("//build/toolchain:msvc")

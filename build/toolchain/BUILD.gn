@@ -1,30 +1,42 @@
 toolchain("msvc") {
-    cl = "cl.exe"
-    link = "link.exe"
+  cl = "cl.exe"
+  link = "link.exe"
 
-    my_cl_flags = "/nologo /showIncludes /EHsc /W3 /Od /Zi"
-    my_link_flags = "/nologo"
+  object_subdir = "$default_output_dir/{{target_out_dir}}/{{label_name}}"
 
-    object_subdir = "{{target_out_dir}}/{{label_name}}"
+  tool("cxx") {
+    depsformat = "msvc"
+    description = "MSVC CXX {{output}}"
+    rspfile = "{{output}}_cc.rsp"
+    rspfile_content = "{{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}}"
+    pdbname = "$object_subdir/{{target_output_name}}_cc.pdb"
+    command = "$cl @$rspfile /c {{source}} /FS /Fo:{{output}} /Fd:\"$pdbname\""
+    outputs = [
+      "$object_subdir/{{source_name_part}}.obj",
+    ]
+  }
 
-    tool("cxx") {
-        rspfile = "{{output}}.rsp"
-        pdbname = "{{target_out_dir}}/{{label_name}}_cc.pdb"
-        command = "$cl ${my_cl_flags} @$rspfile /c {{source}} /FS /Fo:{{output}} /Fd:\"$pdbname\""
-        depsformat = "msvc"
-        description = "MSVC CXX {{output}}"
-        outputs = [ "$object_subdir/{{source_name_part}}.obj" ]
-        rspfile_content = "{{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}}"
-    }
+  tool("solink") {
+    default_output_extension = ".dll"
+    dllname = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+    rspfile = "{{output}}_solink.rsp"
+    rspfile_content = "{{inputs}} {{solibs}} {{libs}} {{ldflags}}"
+    pdbname = "$object_subdir/{{target_output_name}}_solink.pdb"
+    command = "$link /DLL /OUT:$dllname /PDB:$pdbname @$rspfile"
+    outputs = [
+      dllname,
+    ]
+  }
 
-    tool("link") {
-        exename = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
-        pdbname = "{{target_output_name}}.pdb"
-        default_output_extension = ".exe"
-        default_output_dir = "{{root_out_dir}}"
-        command = "$link ${my_link_flags} /OUT:$exename /PDB:$pdbname {{inputs}} {{libs}} {{solibs}} {{ldflags}}"
-        outputs = [
-            exename,
-        ]
-    }
+  tool("link") {
+    default_output_extension = ".exe"
+    exename = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+    rspfile = "{{output}}_link.rsp"
+    rspfile_content = "{{inputs}} {{solibs}} {{libs}} {{ldflags}}"
+    pdbname = "$object_subdir/{{target_output_name}}_link.pdb"
+    command = "$link /OUT:$exename /PDB:$pdbname {{inputs}} {{solibs}} {{libs}} {{ldflags}}"
+    outputs = [
+      exename,
+    ]
+  }
 }

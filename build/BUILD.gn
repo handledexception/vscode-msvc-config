@@ -1,0 +1,33 @@
+config("compiler_defaults") {
+  if (is_windows) {
+    cflags = [
+      "/nologo",
+      "/showIncludes",
+      "/EHsc",
+      "/W3",
+      "/Od",
+      "/Zi",
+    ]
+
+    defines = [ "UNICODE" ]
+  }
+}
+
+config("default_libs") {
+  if (is_windows) {
+    libs = [
+      "ole32.lib",
+      "user32.lib",
+    ]
+  }
+}
+
+config("linker_defaults") {
+  if (is_windows) {
+    ldflags = [ "/nologo" ]
+
+    if (is_debug) {
+      ldflags += [ "/DEBUG" ]
+    }
+  }
+}

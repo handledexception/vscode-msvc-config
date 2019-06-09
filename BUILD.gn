@@ -1,28 +1,33 @@
-#TODO:
-# - separate out folders for Release/Debug and x86/x64
+shared_library("Utils") {
+  sources = [
+    "//src/PObject.cpp",
+  ]
 
-config("wincfg") {
-    defines = [ "UNICODE" ]
-    libs = [
-        "user32.lib"
-    ]
+  include_dirs = [
+    "//src",
+    "//inc",
+  ]
 }
 
 executable("App") {
-    ldflags = [ 
-        "/DEBUG"
-    ]
+  sources = [
+    "//src/PGraphics.cpp",
+    "//src/PMainWindow.cpp",
+    "//src/PWindow.cpp",
+    "//src/main.cpp",
+  ]
 
-    sources = [
-        "//src/PWindow.cpp",
-        "//src/PMainWindow.cpp",
-        "//src/main.cpp",
-    ]
+  include_dirs = [
+    "//src",
+    "//inc",
+  ]
 
-    include_dirs = [
-        "//src",
-        "//inc"
+  if (is_windows) {
+    libs = [
+      "dxgi.lib",
+      "d3d11.lib",
     ]
-    
-    configs = [ ":wincfg" ]
+  }
+
+  ldflags = [ "$default_output_dir/Utils.lib" ]
 }
