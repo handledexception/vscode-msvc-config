@@ -7,4 +7,10 @@ VSCode setup was taken from a VSCode Github issues thread: https://github.com/Mi
 2. Create the paths ${workspaceFolder}/Debug/x86 and x64 before compiling with MSVC
 3. Install gn/ninja in your PATH if you want to build with those tools.
 
+## Notes
+
+- Microsoft - [Recommended 8-Bit YUV Formats for Video Rendering](https://docs.microsoft.com/en-us/windows/desktop/medfound/recommended-8-bit-yuv-formats-for-video-rendering#converting-8-bit-yuv-to-rgb888)
+
+- Microsoft - [Holographic face tracking NV12 example](https://github.com/microsoft/Windows-universal-samples/tree/fe8567faf2efdea3672c2ba642ba7b925ff6467e/Samples/HolographicFaceTracking)
+
 
