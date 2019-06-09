@@ -1,6 +1,6 @@
 {
-    "files.associations": {
-        "cstdint": "cpp",
-        "vector": "cpp"
-    }
+	"files.associations": {
+		"cstdint": "cpp",
+		"vector": "cpp"
+	}
 }
