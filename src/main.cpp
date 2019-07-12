@@ -12,17 +12,17 @@
 #define RENDER_WIDTH 640
 #define RENDER_HEIGHT 360
 
-void init_preview_video_info(gfx::gfx_video_info_t* vid_info)
+void init_preview_video_info(gfx::gfx_video_info_t& vid_info)
 {
-	if (vid_info) {
-		vid_info->adapter_index = 0;
-		vid_info->canvas_height = CANVAS_HEIGHT;
-		vid_info->canvas_width = CANVAS_WIDTH;
-		vid_info->fps_den = 1;
-		vid_info->fps_num = 30;
-		vid_info->render_height = RENDER_HEIGHT;
-		vid_info->render_width = RENDER_WIDTH;
-	}
+	vid_info.m_adapter_index = 0;
+	vid_info.m_canvas_height = CANVAS_HEIGHT;
+	vid_info.m_canvas_width = CANVAS_WIDTH;
+	vid_info.m_fps_den = 1;
+	vid_info.m_fps_num = 30;
+	vid_info.m_render_height = RENDER_HEIGHT;
+	vid_info.m_render_width = RENDER_WIDTH;
+	vid_info.m_dxgi_format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, int cmdShow)
@@ -45,9 +45,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 
 	// preview view
 	struct gfx::gfx_video_info pvi;
-	init_preview_video_info(&pvi);
-	gfx::enumerate_adapters();
-	gfx::reset_video(&pvi, view_wnd->GetHandle());
+	init_preview_video_info(pvi);
+	gfx::reset_graphics(pvi, view_wnd->GetHandle());
 
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0) > 0) {
@@ -60,7 +59,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 	delete main_wnd;
 	main_wnd = nullptr;
 
-	gfx::shutdown_video();
+	gfx::shutdown_graphics();
 
 	return 0;
 }

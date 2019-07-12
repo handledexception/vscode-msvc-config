@@ -22,6 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{0F6F53FD-CEFE-4D45-AD1B-FD2979A3DDF2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -37,7 +38,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -102,16 +103,23 @@
     <ClCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_UNICODE; UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\PGraphics.cpp" />
+    <ClCompile Include="src\PLogger.cpp" />
     <ClCompile Include="src\PMainWindow.cpp" />
+    <ClCompile Include="src\PObject.cpp" />
     <ClCompile Include="src\PWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\PGraphics.h" />
+    <ClInclude Include="src\PLogger.h" />
     <ClInclude Include="src\PMainWindow.h" />
+    <ClInclude Include="src\PObject.h" />
     <ClInclude Include="src\PWindow.h" />
   </ItemGroup>
   <ItemGroup>
