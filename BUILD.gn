@@ -11,6 +11,7 @@ shared_library("Utils") {
 
 executable("App") {
   sources = [
+    # "//src/GraphicsD3D11.cpp",
     "//src/PGraphics.cpp",
     "//src/PMainWindow.cpp",
     "//src/PWindow.cpp",
@@ -20,6 +21,7 @@ executable("App") {
   include_dirs = [
     "//src",
     "//inc",
+    "//DirectXTK//Inc",
   ]
 
   if (is_windows) {
