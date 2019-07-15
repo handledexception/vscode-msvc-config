@@ -4,6 +4,7 @@
 #include "PObject.h"
 
 #include <cstdint>
+#include <memory>
 #include <thread>
 #include <map>
 #include <memory>
@@ -17,9 +18,17 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 
+#include "SimpleMath.h"
+
+using DirectX::SimpleMath::Matrix;
+using DirectX::SimpleMath::Rectangle;
+using DirectX::SimpleMath::Vector2;
+using DirectX::SimpleMath::Vector3;
+using DirectX::SimpleMath::Vector4;
 using Microsoft::WRL::ComPtr;
 
-namespace gfx {
+namespace gfx
+{
 
 typedef struct gfx_rect_int32 gfx_rect_int32_t;
 typedef struct gfx_rect_int64 gfx_rect_int64_t;
@@ -30,6 +39,7 @@ typedef struct gfx_device gfx_device_t;
 typedef struct gfx_zstencil_buffer gfx_zstencil_buffer_t;
 typedef struct gfx_texture_2d gfx_texture_2d_t;
 typedef struct gfx_vertex gfx_vertex_t;
+
 typedef struct gfx_system gfx_system_t;
 typedef struct gfx_object gfx_object_t;
 
@@ -44,15 +54,38 @@ struct gfx_video_info {
 	DXGI_FORMAT m_dxgi_format;
 };
 
+typedef struct gfx_vertex_shader gfx_vertex_shader_t;
+typedef struct gfx_pixel_shader gfx_pixel_shader_t;
+typedef struct gfx_core gfx_core_t;
+
 struct gfx_vertex {
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT2 tex_coord;
+	struct Vector3 position;
+	struct Vector3 color;
+	struct Vector2 tex_coord;
 };
 
 struct gfx_system {
 	std::shared_ptr<gfx_device_t> m_gfx_device;
 	gfx_video_info_t m_video_info;
 	bool gfx_done;
+};
+
+struct gfx_vertex_shader {
+	ComPtr<ID3D11Buffer> vertex_buffer;
+	ComPtr<ID3D11Buffer> matrix_buffer;
+	ComPtr<ID3D11InputLayout> vertex_layout;
+	ComPtr<ID3D11VertexShader> shader;
+	ComPtr<ID3DBlob> shader_blob;
+	gfx_swapchain_t *swapchain;
+	gfx_vertex_shader(gfx_swapchain_t *sc) { swapchain = sc; };
+	void CreateVertexBuffer(void *data, size_t elem_size, bool dynamic_usage=false);
+	void InitInputElements();
+};
+
+struct gfx_pixel_shader {
+	ComPtr<ID3D11PixelShader> shader;
+	ComPtr<ID3D11SamplerState> sampler_state;
+	ComPtr<ID3DBlob> shader_blob;
 };
 
 template <class T> struct gfx_rect {
@@ -97,6 +130,7 @@ struct gfx_swapchain : PObject {
 	void InitRenderTarget(uint32_t cx, uint32_t cy);
 	void InitZStencilBuffer(uint32_t cx, uint32_t cy);
 	void Resize(uint32_t cx, uint32_t cy);
+
 	gfx_swapchain(std::shared_ptr<gfx_device_t> device, gfx_video_info_t& vid_info, HWND hwnd);
 	~gfx_swapchain();
 };
@@ -107,28 +141,37 @@ struct gfx_device : PObject {
 	ComPtr<ID3D11Device> device;
 	ComPtr<ID3D11DeviceContext> context;
 
-	gfx_rect<int32_t> viewport;
+	D3D11_VIEWPORT viewport;
 	gfx_swapchain* swapchain;
 	gfx_texture_2d* current_render_target;
-	
+	gfx_zstencil_buffer *current_zstencil_buf;
+
+	gfx_vertex_shader *vertex_shader;
+	gfx_pixel_shader *pixel_shader;
+
+	struct Matrix view_matrix;
+	struct Matrix ortho_matrix;
+
 	void InitFactory(uint32_t adapter_idx);
 	void InitDevice(uint32_t adapter_idx);
-
+	void SetRenderTarget(gfx_texture_2d_t *texture, gfx_zstencil_buffer_t *zstencil);
+	void ResetViewport(uint32_t width, uint32_t height);
+	void InitShaders();
 	gfx_device(uint32_t adapter_idx);
 	~gfx_device();
 };
 
 struct gfx_monitor {
-	int32_t index;
-	std::wstring name;
-	gfx_rect<int32_t> geometry;
-	DXGI_MODE_ROTATION rotation;
+	int32_t m_index;
+	std::wstring m_name;
+	gfx_rect<int32_t> m_geometry;
+	DXGI_MODE_ROTATION m_rotation;
 };
 
 struct gfx_adapter {
-	int32_t index;
-	std::wstring name;
-	std::vector<gfx_monitor> monitors;
+	int32_t m_index;
+	std::wstring m_name;
+	std::vector<gfx_monitor> m_monitors;
 };
 
 static std::unique_ptr<gfx_system> graphics_system;
@@ -142,4 +185,4 @@ void video_thread_loop();
 void reset_graphics(gfx_video_info_t& vid_info, HWND view_wnd);
 void shutdown_graphics();
 
-};
+}; // namespace gfx

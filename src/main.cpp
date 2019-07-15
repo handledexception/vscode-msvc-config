@@ -7,6 +7,9 @@
 #include "PWindow.h"
 #include "PGraphics.h"
 
+// #include "Graphics.h"
+// #include "GraphicsD3D11.h"
+
 #define CANVAS_WIDTH 1920
 #define CANVAS_HEIGHT 1080
 #define RENDER_WIDTH 640
@@ -43,6 +46,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 	view_wnd->Init(NULL, WS_CHILD | WS_CLIPCHILDREN);
 	view_wnd->Show(true);
 
+	// pas::IGraphicsDevice* graphics_device = new pas::D3D11GraphicsDevice();
+	// graphics_device->Create(0);
+	
 	// preview view
 	struct gfx::gfx_video_info pvi;
 	init_preview_video_info(pvi);
@@ -60,6 +66,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 	main_wnd = nullptr;
 
 	gfx::shutdown_graphics();
+
+	CoUninitialize();
 
 	return 0;
 }

@@ -7,13 +7,11 @@
 static uint64_t g_allocated_bytes = 0;
 static uint64_t g_num_allocs = 0;
 
-PObject::PObject()
-{
+PObject::PObject() {
 	this->references = 1;
 }
 
-void* PObject::operator new(size_t size)
-{
+void* PObject::operator new(size_t size) {
 	void* ptr = malloc(size);
 	g_allocated_bytes += size;
 	g_num_allocs += 1;
@@ -21,20 +19,17 @@ void* PObject::operator new(size_t size)
 	return ptr;
 }
 
-void PObject::operator delete(void* ptr)
-{
+void PObject::operator delete(void* ptr) {
 	//TODO: figure out how to track object type to accurately decrement g_allocated_bytes
 	free(ptr);
 	g_num_allocs -= 1;
 }
 
-void PObject::Acquire() const
-{
+void PObject::Acquire() const {
 	this->references++;
 }
 
-void PObject::Release() const
-{
+void PObject::Release() const {
 	this->references--;
 	if (references > 0)
 		return;

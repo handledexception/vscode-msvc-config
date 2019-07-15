@@ -7,7 +7,7 @@
 class EXPORT PObject {
 public:
 	PObject();
-	~PObject() {};
+	~PObject();
 	void* operator new(size_t);
 	void operator delete(void*);
 	void Acquire() const;

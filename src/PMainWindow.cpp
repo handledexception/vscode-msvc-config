@@ -49,8 +49,7 @@ LRESULT PMainWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void PMainWindow::install_menubar()
-{
+void PMainWindow::install_menubar() {
 	HMENU hMenubar = ::CreateMenu();
 	HMENU hFileMenu = ::CreateMenu();
 	HMENU hHelpMenu = ::CreateMenu();

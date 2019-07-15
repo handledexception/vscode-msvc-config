@@ -4,7 +4,15 @@
 #define MENU_FILE_OPEN 2
 #define MENU_FILE_QUIT 3
 
-PWindow::PWindow(wchar_t* title, uint32_t cx, uint32_t cy, uint32_t width, uint32_t height, HINSTANCE hinst, HWND parent)
+PWindow::PWindow(
+	wchar_t* title,
+	uint32_t cx,
+	uint32_t cy,
+	uint32_t width,
+	uint32_t height,
+	HINSTANCE hinst,
+	HWND parent
+)
 :
 mWindowTitle(title),
 mWindowClassName(nullptr),
@@ -18,16 +26,14 @@ mHwnd(nullptr)
 {
 }
 
-PWindow::~PWindow()
-{
+PWindow::~PWindow() {
 	if (mHwnd) {
 		DestroyWindow(mHwnd);
 		mHwnd = nullptr;
 	}
 }
 
-bool PWindow::Init(int32_t hwndExStyle, int32_t hwndStyle)
-{
+bool PWindow::Init(int32_t hwndExStyle, int32_t hwndStyle) {
 	register_class();
 	if (!create_hwnd(hwndExStyle, hwndStyle))
 		return false;
@@ -35,8 +41,7 @@ bool PWindow::Init(int32_t hwndExStyle, int32_t hwndStyle)
 	return true;
 }
 
-LRESULT PWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
+LRESULT PWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	if (msg == WM_CREATE) {
 		OutputDebugString(L"PWindow::WndProc -> WM_CREATE\n");
 	}
@@ -47,8 +52,7 @@ LRESULT PWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void PWindow::Show(bool show)
-{
+void PWindow::Show(bool show) {
 	if (show == true) {
 		ShowWindowAsync(mHwnd, SW_SHOWNORMAL);
 	}
@@ -59,8 +63,7 @@ void PWindow::Show(bool show)
 	UpdateWindow(mHwnd);
 }
 
-LRESULT CALLBACK PWindow::static_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
+LRESULT CALLBACK PWindow::static_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	if (msg == WM_CREATE) {
 		PWindow* wnd = reinterpret_cast<PWindow*>(
 			reinterpret_cast<LPCREATESTRUCT>(lparam)->lpCreateParams
@@ -73,7 +76,7 @@ LRESULT CALLBACK PWindow::static_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 	}
 
 	if (msg == WM_CLOSE) {
-		OutputDebugString(L"PWindow::static_wndproc -> WM_CLOSE");
+		OutputDebugString(L"PWindow::static_wndproc -> WM_CLOSE\n");
 	}
 
 	PWindow* wnd = reinterpret_cast<PWindow*>(::GetWindowLongPtr(hwnd, GWLP_USERDATA));
@@ -84,8 +87,7 @@ LRESULT CALLBACK PWindow::static_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void PWindow::register_class()
-{
+void PWindow::register_class() {
 	WNDCLASSEX wcex;
 
 	// window class already registered
@@ -113,8 +115,7 @@ void PWindow::register_class()
 	}
 }
 
-HWND PWindow::create_hwnd(int32_t exStyle, int32_t style)
-{
+HWND PWindow::create_hwnd(int32_t exStyle, int32_t style) {
 	HWND hwnd = CreateWindowEx(
 		exStyle,
 		mWindowTitle,
