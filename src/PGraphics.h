@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PWindow.h"
-#include "PObject.h"
 
 #include <cstdint>
 #include <memory>
@@ -117,7 +116,7 @@ struct gfx_texture_2d {
 	DXGI_FORMAT m_dxgi_format;
 };
 
-struct gfx_swapchain : PObject {
+struct gfx_swapchain {
 	HWND m_hwnd;
 	DXGI_SWAP_CHAIN_DESC m_swap_desc = {};
 	ComPtr<IDXGISwapChain> m_dxgi_swapchain;
@@ -135,7 +134,7 @@ struct gfx_swapchain : PObject {
 	~gfx_swapchain();
 };
 
-struct gfx_device : PObject {
+struct gfx_device {
 	ComPtr<IDXGIFactory1> m_dxgi_factory;
 	ComPtr<IDXGIAdapter1> adapter;
 	ComPtr<ID3D11Device> device;

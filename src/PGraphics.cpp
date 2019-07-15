@@ -41,7 +41,6 @@ void video_thread_loop() {
 
 void reset_graphics(gfx_video_info_t& vid_info, HWND view_wnd)
 {
-	HRESULT hr;
 	ComPtr<ID3D11Buffer> back_buffer;
 	struct gfx_device *gfx_dev = nullptr;
 
@@ -77,7 +76,6 @@ void reset_graphics(gfx_video_info_t& vid_info, HWND view_wnd)
 		SCREEN_DEPTH
 	);
 
-	//graphics_system->m_gfx_device = std::make_unique<gfx_device_t>(*gfx_dev);
 	graphics_system->m_video_info = vid_info;
 	graphics_system->gfx_done = false;
 	video_thread = std::thread(video_thread_loop);

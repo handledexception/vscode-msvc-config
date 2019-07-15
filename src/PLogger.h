@@ -2,8 +2,6 @@
 
 #include <cstdarg>
 #include <string>
-#include <codecvt>
-#include <locale>
 
 #include <Windows.h>
 

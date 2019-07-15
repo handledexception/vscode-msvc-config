@@ -4,15 +4,22 @@
 
 #define EXPORT __declspec( dllexport )
 
+namespace pas {
+
 class EXPORT PObject {
 public:
 	PObject();
-	~PObject();
+	~PObject() {};
+
 	void* operator new(size_t);
 	void operator delete(void*);
+
 	void Acquire() const;
 	void Release() const;
-	size_t alloc_size;
+	
 private:
-	mutable int32_t references;
+	mutable int32_t m_refs;
+	mutable size_t m_alloc_size;
+};
+
 };
