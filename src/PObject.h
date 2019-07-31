@@ -2,24 +2,27 @@
 
 #include <cstdint>
 
-#define EXPORT __declspec( dllexport )
+#define UTILS_EXPORT __declspec( dllexport )
 
 namespace pas {
 
-class EXPORT PObject {
+class UTILS_EXPORT PObject {
 public:
 	PObject();
+	// PObject(const PObject& obj);
+	// PObject(const PObject&& obj);
 	~PObject() {};
 
 	void* operator new(size_t);
 	void operator delete(void*);
+	// PObject operator=(const PObject& obj);
 
 	void Acquire() const;
 	void Release() const;
 	
 private:
-	mutable int32_t m_refs;
-	mutable size_t m_alloc_size;
+	mutable uint32_t m_refs;
+	size_t m_alloc_size;
 };
 
 };

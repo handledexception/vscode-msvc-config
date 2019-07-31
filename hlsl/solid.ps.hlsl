@@ -31,15 +31,15 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
 ////////////////////////////////////////////////////////////////////////////////
-float4 TexturePixelShader(PixelInputType input) : SV_TARGET
+float4 PSMain(PixelInputType input) : SV_TARGET
 {
 	float4 textureColor;
 
 
     // Sample the pixel color from the texture using the sampler at this texture coordinate location.
-    textureColor = shaderTexture.Sample(SampleType, input.tex);
+   textureColor = shaderTexture.Sample(SampleType, input.tex);
 
-    return textureColor;
+   return textureColor;
 
 	//return float4( 1.0f, 0.25f, 0.0f, 1.0f );
 }

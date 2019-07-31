@@ -13,70 +13,95 @@
 using Microsoft::WRL::ComPtr;
 
 namespace pas {
+	static std::thread video_thread;
+
 	struct D3D11SwapChain;
-	struct D3D11GraphicsDevice;
+	struct GFX_EXPORT D3D11GraphicsDevice;
 	struct D3D11Texture2D;
 	struct D3D11ZStencil;
+	struct D3D11GraphicsDesc;
+
+	struct GFX_EXPORT D3D11GraphicsCore : public IGraphicsCore {
+		static void ResetVideo(D3D11GraphicsDesc& desc, HWND hwnd);
+		static void Shutdown();
+		std::shared_ptr<D3D11GraphicsDevice> m_GraphicsDevice;
+	};
+
+	struct D3D11GraphicsDesc : public IGraphicsDesc {
+		DXGI_FORMAT m_DXGIFormat;
+	};
 
 	struct D3D11ZStencil : public IZStencil {
-		D3D11GraphicsDevice* m_graphics_device;
-		DXGI_FORMAT m_dxgi_format;
-		ComPtr<ID3D11Texture2D> m_texture;
-		ComPtr<ID3D11DepthStencilView> m_zstencil_view;
-		D3D11_TEXTURE2D_DESC m_texture_desc = {};
-		D3D11_DEPTH_STENCIL_VIEW_DESC m_zstencil_view_desc = {};
-		uint32_t m_width;
-		uint32_t m_height;
+		std::shared_ptr<D3D11GraphicsDevice> m_GraphicsDevice;
+		DXGI_FORMAT m_DXGIFormat;
+		ComPtr<ID3D11Texture2D> m_Texture;
+		ComPtr<ID3D11DepthStencilView> m_ZStencilView;
+		D3D11_TEXTURE2D_DESC m_TextureDesc = {};
+		D3D11_DEPTH_STENCIL_VIEW_DESC m_ZStencilViewDesc = {};
 
 		// virtual
 		void Initialize();
 	};
 
 	struct D3D11Texture2D : public ITexture2D {
-		D3D11GraphicsDevice* m_graphics_device;
-		DXGI_FORMAT m_dxgi_format;
-		ComPtr<ID3D11Texture2D> m_texture;
-		ComPtr<ID3D11RenderTargetView> m_render_target_view;
-		uint32_t m_width;
-		uint32_t m_height;
+		std::shared_ptr<D3D11GraphicsDevice> m_GraphicsDevice;
+		DXGI_FORMAT m_DXGIFormat;
+		ComPtr<ID3D11Texture2D> m_Texture;
+		ComPtr<ID3D11RenderTargetView> m_RTV;
+	};
+
+	struct D3D11VertexBuffer {
+		D3D11VertexBuffer(std::shared_ptr<D3D11GraphicsDevice> device) : m_GraphicsDevice(device) {};
+		void Create(void* data, size_t elem_size, bool dynamic_usage);
+		ComPtr<ID3D11Buffer> m_VertexBuffer;
+		std::shared_ptr<D3D11GraphicsDevice> m_GraphicsDevice;
+	};
+
+	struct D3D11VertexShader {
+		
 	};
 
 	struct D3D11SwapChain : public ISwapChain {
-		HWND m_hwnd;
-		DXGI_SWAP_CHAIN_DESC m_swap_desc = {};
-		ComPtr<IDXGISwapChain> m_dxgi_swapchain;
-		D3D11GraphicsDevice* m_graphics_device;
-		D3D11Texture2D m_render_target_texture;
-		D3D11ZStencil m_zstencil_buffer;
+		D3D11SwapChain(std::shared_ptr<D3D11GraphicsDevice> gfx_dev) : m_GraphicsDevice(gfx_dev) { };
 
 		// virtual
-		void Initialize(uint32_t cx, uint32_t cy, uint32_t fps_num, uint32_t fps_den);
+		void Initialize(IGraphicsDesc& desc, HWND hwnd);
 		void InitRenderTarget(uint32_t cx, uint32_t cy);
 		void InitZStencilBuffer(uint32_t cx, uint32_t cy);
 		void Resize(uint32_t cx, uint32_t cy);
-		void SetDevice(IGraphicsDevice* graphics_device);
+		//void SetDevice(IGraphicsDevice* graphics_device);
 
 		void SetWindowHandle(HWND hwnd);
+
+		HWND m_Hwnd;
+		DXGI_SWAP_CHAIN_DESC m_SwapDesc = {};
+		ComPtr<IDXGISwapChain> m_DXGISwapChain;
+		std::shared_ptr<D3D11GraphicsDevice> m_GraphicsDevice;
+		D3D11Texture2D m_RenderTargetTexture;
+		D3D11ZStencil m_ZStencilBuffer;
 	};
 
-	struct D3D11GraphicsDevice : public IGraphicsDevice {
+	struct GFX_EXPORT D3D11GraphicsDevice : public IGraphicsDevice {
+		D3D11GraphicsDevice();
+		~D3D11GraphicsDevice();
 		// virtual
 		void Create(uint32_t adapter_index);
 		void Destroy();
 		void Initialize(uint32_t adapter_index);
+
 		void SetRenderTarget(D3D11Texture2D* texture, D3D11ZStencil* zstencil);
-
 		void InitFactory(uint32_t adapter_index);
+		void ResetViewport(uint32_t width, uint32_t height);
 
-		ComPtr<IDXGIFactory1> m_dxgi_factory;
-		ComPtr<IDXGIAdapter1> m_adapter;
-		ComPtr<ID3D11Device> m_d3d11_device;
-		ComPtr<ID3D11DeviceContext> m_d3d11_context;
-		D3D11_VIEWPORT m_viewport;
+		ComPtr<IDXGIFactory1> m_DXGIFactory;
+		ComPtr<IDXGIAdapter1> m_DXGIAdapter;
+		ComPtr<ID3D11Device> m_D3D11Device;
+		ComPtr<ID3D11DeviceContext> m_D3D11Context;
+		D3D11_VIEWPORT m_Viewport;
 
-		D3D11SwapChain* m_swapchain;
-		D3D11Texture2D* m_render_target;
-		D3D11ZStencil* m_zstencil_buffer;
+		std::shared_ptr<D3D11SwapChain> m_Swapchain;
+		D3D11Texture2D* m_CurrentRenderTarget;
+		D3D11ZStencil* m_CurrentZStencil;
 	};
 
 };

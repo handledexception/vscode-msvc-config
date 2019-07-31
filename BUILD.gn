@@ -1,5 +1,6 @@
 shared_library("Utils") {
   sources = [
+    "//src/PLogger.cpp",
     "//src/PObject.cpp",
   ]
 
@@ -7,6 +8,29 @@ shared_library("Utils") {
     "//src",
     "//inc",
   ]
+}
+
+shared_library("Graphics") {
+  sources = [
+    "//src/GraphicsD3D11.cpp",
+  ]
+
+  include_dirs = [
+    "//src",
+    "//inc",
+    "//DirectXTX//Inc"
+  ]
+
+  if (is_windows) {
+    libs = [
+      "dxgi.lib",
+      "d3dcompiler.lib",
+      "d3d11.lib",
+    ]
+  }
+
+  cflags_cc = [ "/wd4251" ]
+  ldflags = [ "$default_output_dir/Utils.lib" ]
 }
 
 executable("App") {
@@ -27,9 +51,14 @@ executable("App") {
   if (is_windows) {
     libs = [
       "dxgi.lib",
+      "d3dcompiler.lib",
       "d3d11.lib",
     ]
   }
 
-  ldflags = [ "$default_output_dir/Utils.lib" ]
+  cflags_cc = [ "/wd4251" ]
+  ldflags = [
+    "$default_output_dir/Utils.lib",
+    "$default_output_dir/Graphics.lib",
+  ]
 }

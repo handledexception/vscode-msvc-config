@@ -5,6 +5,8 @@
 
 #include <Windows.h>
 
+#define UTILS_EXPORT __declspec( dllexport )
+
 enum LOG_LEVEL {
 	Info = 100,
 	Debug = 200,
@@ -15,7 +17,7 @@ enum LOG_LEVEL {
 static std::wstring str2wstr(const std::string& str);
 static  std::string wstr2str(const std::wstring& wstr);
 
-class PLogger {
+class UTILS_EXPORT PLogger {
 public:
 	PLogger() {};
 	~PLogger() {};

@@ -7,8 +7,8 @@
 #include "PWindow.h"
 #include "PGraphics.h"
 
-// #include "Graphics.h"
-// #include "GraphicsD3D11.h"
+//#include "Graphics.h"
+//#include "GraphicsD3D11.h"
 
 #define CANVAS_WIDTH 1920
 #define CANVAS_HEIGHT 1080
@@ -25,8 +25,19 @@ void init_preview_video_info(gfx::gfx_video_info_t& vid_info)
 	vid_info.m_render_height = RENDER_HEIGHT;
 	vid_info.m_render_width = RENDER_WIDTH;
 	vid_info.m_dxgi_format = DXGI_FORMAT_R8G8B8A8_UNORM;
-
 }
+
+//void InitializeGraphicsDesc(pas::D3D11GraphicsDesc& desc)
+//{
+//	desc.m_AdapterIndex = 0;
+//	desc.m_CanvasHeight = CANVAS_HEIGHT;
+//	desc.m_CanvasWidth = CANVAS_WIDTH;
+//	desc.m_FpsDen = 1;
+//	desc.m_FpsNum = 30;
+//	desc.m_RenderHeight = RENDER_HEIGHT;
+//	desc.m_RenderWidth = RENDER_WIDTH;
+//	desc.m_DXGIFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+//}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, int cmdShow)
 {
@@ -46,9 +57,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 	view_wnd->Init(NULL, WS_CHILD | WS_CLIPCHILDREN);
 	view_wnd->Show(true);
 
-	// pas::IGraphicsDevice* graphics_device = new pas::D3D11GraphicsDevice();
-	// graphics_device->Create(0);
-	
+	// pas::D3D11GraphicsDesc graphics_desc;
+	// InitializeGraphicsDesc(graphics_desc);
+	// pas::D3D11GraphicsCore::ResetVideo(graphics_desc, view_wnd->GetHandle());
+
 	// preview view
 	struct gfx::gfx_video_info pvi;
 	init_preview_video_info(pvi);
@@ -60,12 +72,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 		DispatchMessage(&msg);
 	}
 
+	// pas::D3D11GraphicsCore::Shutdown();
+	gfx::shutdown_graphics();
+
 	delete view_wnd;
 	view_wnd = nullptr;
 	delete main_wnd;
 	main_wnd = nullptr;
-
-	gfx::shutdown_graphics();
 
 	CoUninitialize();
 

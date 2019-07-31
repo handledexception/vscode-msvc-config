@@ -3,7 +3,8 @@
 
 #include <exception>
 #include <map>
-#include <string>
+
+#include <d3dcompiler.h>
 
 // #pragma comment(lib, "dxgi.lib")
 // #pragma comment(lib, "d3d11.lib")
@@ -15,13 +16,28 @@ const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
 
 void device_clear() {
-	ID3D11RenderTargetView* rtv = graphics_system->m_gfx_device->swapchain->m_render_target_tex.m_rtv.Get();
+	auto device = graphics_system->m_gfx_device;
+	auto ctx = device->m_d3d11_context;
+
+	ID3D11RenderTargetView* rtv = device->m_swapchain->m_render_target_tex.m_rtv.Get();
 	const float clear_color[4] = {
 		0.0, 1.0, 0.0, 1.0,
 	};
-	if (rtv) {
-		graphics_system->m_gfx_device->context->ClearRenderTargetView(rtv, clear_color);
-		graphics_system->m_gfx_device->swapchain->m_dxgi_swapchain->Present(1, 0);
+	if (rtv && device) {
+		ctx->ClearRenderTargetView(rtv, clear_color);
+		
+		uint32_t vert_stride = sizeof(gfx_vertex_t);
+		uint32_t vert_offset = 0;
+		auto vert_buf = device->m_vertex_shader->m_vertex_buffer.GetAddressOf();
+		ctx->IASetVertexBuffers(0, 1, vert_buf, &vert_stride, &vert_offset);
+		ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		device->m_vertex_shader->SetParameters(device->m_view_matrix, device->m_ortho_matrix);
+		ctx->VSSetShader(device->m_vertex_shader->m_shader.Get(), nullptr, 0);
+		ctx->PSSetShader(device->m_pixel_shader->m_shader.Get(), nullptr, 0);
+		ctx->PSSetSamplers(0, 1, device->m_pixel_shader->m_sampler_state.GetAddressOf());
+		ctx->Draw(6, 0);
+
+		device->m_swapchain->m_dxgi_swapchain->Present(1, 0);
 	}
 }
 
@@ -53,14 +69,20 @@ void reset_graphics(gfx_video_info_t& vid_info, HWND view_wnd)
 		graphics_system->m_gfx_device = std::shared_ptr<gfx_device_t>(new gfx_device(vid_info.m_adapter_index));
 
 	gfx_dev = graphics_system->m_gfx_device.get();
-	if (!gfx_dev->swapchain)
-		gfx_dev->swapchain = new gfx_swapchain(graphics_system->m_gfx_device, vid_info, view_wnd);
+	if (!gfx_dev->m_swapchain)
+		gfx_dev->m_swapchain = std::shared_ptr<gfx_swapchain_t>(
+			new gfx_swapchain(graphics_system->m_gfx_device, vid_info, view_wnd));
 
-	gfx_dev->swapchain->m_hwnd = view_wnd;
-	gfx_dev->swapchain->m_gfx_device = graphics_system->m_gfx_device;
-	gfx_dev->swapchain->m_vid_info = vid_info;
+	gfx_dev->m_swapchain->m_hwnd = view_wnd;
+	gfx_dev->m_swapchain->m_gfx_device = graphics_system->m_gfx_device;
+	gfx_dev->m_swapchain->m_vid_info = vid_info;
+	//gfx_dev->SetRenderTarget(gfx_dev->m_curr_render_target, gfx_dev->m_curr_zstencil_buf);
+	gfx_dev->SetRenderTarget(gfx_dev->m_curr_render_target);
 
-	graphics_system->m_gfx_device->InitShaders();
+	bool shaders_ok = graphics_system->m_gfx_device->InitShaders(
+		L"hlsl\\solid.vs.hlsl",
+		L"hlsl\\solid.ps.hlsl");
+	if (!shaders_ok) PLogger::log(LOG_LEVEL::Error, L"Error in InitShaders!\n");
 
 	graphics_system->m_gfx_device->ResetViewport(
 		vid_info.m_render_width,
@@ -68,10 +90,11 @@ void reset_graphics(gfx_video_info_t& vid_info, HWND view_wnd)
 	);
 
 	//TODO: OBS uses function similar to XMMatrixOrthographicOffCenter
-	graphics_system->m_gfx_device->view_matrix = DirectX::XMMatrixIdentity();
-	graphics_system->m_gfx_device->ortho_matrix = DirectX::XMMatrixOrthographicLH(
-		(float)vid_info.m_canvas_width,
-		(float)vid_info.m_canvas_height,
+
+	graphics_system->m_gfx_device->m_view_matrix = DirectX::XMMatrixIdentity();
+	graphics_system->m_gfx_device->m_ortho_matrix = Matrix::CreateOrthographic(
+		(float)vid_info.m_render_width,
+		(float)vid_info.m_render_height,
 		SCREEN_NEAR,
 		SCREEN_DEPTH
 	);
@@ -85,41 +108,37 @@ void shutdown_graphics()
 {
 	if (graphics_system)
 		graphics_system->gfx_done = true;
-	video_thread.join();
-
-	graphics_system->m_gfx_device.reset();
-	graphics_system.reset(nullptr);
 
 	if (video_thread.joinable())
 		video_thread.join();
+
+	graphics_system->m_gfx_device->m_swapchain.reset();
+	graphics_system->m_gfx_device.reset();
+	graphics_system.reset(nullptr);
+
 }
 
-void gfx_zstencil_buffer::Init() {
-	HRESULT hr;
-	::ZeroMemory(&tex_desc, sizeof(tex_desc));
-	tex_desc.Width = width;
-	tex_desc.Height = height;
-	tex_desc.MipLevels = 1;
-	tex_desc.ArraySize = 1;
-	tex_desc.Format = dxgi_format;
-	tex_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	tex_desc.SampleDesc.Count = 1;
-	tex_desc.Usage = D3D11_USAGE_DEFAULT;
-
-	hr = m_gfx_device->device->CreateTexture2D(
-		&tex_desc, NULL, texture.ReleaseAndGetAddressOf());
-	if (FAILED(hr))
-		throw std::exception("Failed to create zstencil texture!\n");
-
-	::ZeroMemory(&zs_view_desc, sizeof(zs_view_desc));
-	zs_view_desc.Format = dxgi_format;
-	zs_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-
-	hr = m_gfx_device->device->CreateDepthStencilView(
-		texture.Get(), &zs_view_desc, zs_view.ReleaseAndGetAddressOf());
-	if (FAILED(hr))
-		throw std::exception("Failed to create zstencil view!\n");
-}
+//void gfx_zstencil_buffer::Init() {
+//	D3D11_DEPTH_STENCIL_DESC stencil_desc;
+//	ComPtr<ID3D11DepthStencilState> stencil_state;
+//	stencil_desc.DepthEnable = false;
+//	stencil_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+//	stencil_desc.DepthFunc = D3D11_COMPARISON_LESS;
+//	stencil_desc.StencilEnable = true;
+//	stencil_desc.StencilReadMask = 0xFF;
+//	stencil_desc.StencilWriteMask = 0xFF;
+//	stencil_desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+//	stencil_desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+//	stencil_desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+//	stencil_desc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+//	stencil_desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+//	stencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+//	stencil_desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+//	stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+//
+//	m_gfx_device->m_d3d11_device->CreateDepthStencilState(&stencil_desc, stencil_state.GetAddressOf());
+//	m_gfx_device->m_d3d11_context->OMSetDepthStencilState(stencil_state.Get(), 1);
+//}
 
 void gfx_swapchain::InitRenderTarget(uint32_t cx, uint32_t cy) {
 	HRESULT hr;
@@ -135,7 +154,7 @@ void gfx_swapchain::InitRenderTarget(uint32_t cx, uint32_t cy) {
 	if (FAILED(hr))
 		throw std::exception("IDXGISwapChain::GetBuffer ID3D11Texture2D failed for gfx_swapchain!\n");
 
-	hr = m_gfx_device->device->CreateRenderTargetView(
+	hr = m_gfx_device->m_d3d11_device->CreateRenderTargetView(
 		m_render_target_tex.m_d3d11_texture.Get(),
 		NULL,
 		m_render_target_tex.m_rtv.ReleaseAndGetAddressOf());
@@ -143,20 +162,20 @@ void gfx_swapchain::InitRenderTarget(uint32_t cx, uint32_t cy) {
 		throw std::exception("ID3D11Device::CreateRenderTargetView failed for gfx_swapchain!\n");
 }
 
-void gfx_swapchain::InitZStencilBuffer(uint32_t cx, uint32_t cy)
-{
-	m_zstencil.m_gfx_device = m_gfx_device;
-	m_zstencil.width = cx;
-	m_zstencil.height = cy;
-	m_zstencil.dxgi_format = DXGI_FORMAT_D24_UNORM_S8_UINT; //TODO: What situations call for using a zstencil different format?
-
-	if (cx != 0 && cy != 0)
-		m_zstencil.Init();
-}
+//void gfx_swapchain::InitZStencilBuffer(uint32_t cx, uint32_t cy)
+//{
+//	m_zstencil.m_gfx_device = m_gfx_device;
+//	m_zstencil.width = cx;
+//	m_zstencil.height = cy;
+//	m_zstencil.dxgi_format = DXGI_FORMAT_D24_UNORM_S8_UINT; //TODO: What situations call for using a zstencil different format?
+//
+//	if (cx != 0 && cy != 0)
+//		m_zstencil.Init();
+//}
 
 void gfx_swapchain::Init(uint32_t cx, uint32_t cy) {
 	InitRenderTarget(cx, cy);
-	InitZStencilBuffer(cx, cy);
+	//InitZStencilBuffer(cx, cy);
 }
 
 void gfx_swapchain::Resize(uint32_t cx, uint32_t cy) {
@@ -165,8 +184,8 @@ void gfx_swapchain::Resize(uint32_t cx, uint32_t cy) {
 
 	m_render_target_tex.m_d3d11_texture.Reset();
 	m_render_target_tex.m_rtv.Reset();
-	m_zstencil.texture.Reset();
-	m_zstencil.zs_view.Reset();
+	//m_zstencil.texture.Reset();
+	//m_zstencil.zs_view.Reset();
 
 	if (cx == 0 || cy == 0) {
 		::GetClientRect(m_hwnd, &client_rect);
@@ -179,7 +198,7 @@ void gfx_swapchain::Resize(uint32_t cx, uint32_t cy) {
 		throw std::exception("Failed to resize swap chain buffer!\n");
 
 	InitRenderTarget(cx, cy);
-	InitZStencilBuffer(cx, cy);
+	//InitZStencilBuffer(cx, cy);
 }
 
 gfx_swapchain::gfx_swapchain(std::shared_ptr<gfx_device_t> device, gfx_video_info_t& vid_info, HWND hwnd)
@@ -193,8 +212,10 @@ m_gfx_device(device)
 	memset(&m_swap_desc, 0, sizeof(m_swap_desc));
 	m_swap_desc.BufferCount = 1;
 	m_swap_desc.BufferDesc.Format = vid_info.m_dxgi_format;
-	m_swap_desc.BufferDesc.Width = vid_info.m_canvas_width;
-	m_swap_desc.BufferDesc.Height = vid_info.m_canvas_height;
+	/*m_swap_desc.BufferDesc.Width = vid_info.m_canvas_width;
+	m_swap_desc.BufferDesc.Height = vid_info.m_canvas_height;*/
+	m_swap_desc.BufferDesc.Width = vid_info.m_render_width;
+	m_swap_desc.BufferDesc.Height = vid_info.m_render_height;
 	m_swap_desc.BufferDesc.RefreshRate.Denominator = vid_info.m_fps_den;
 	m_swap_desc.BufferDesc.RefreshRate.Numerator = vid_info.m_fps_num;
 	m_swap_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -203,14 +224,15 @@ m_gfx_device(device)
 	m_swap_desc.Windowed = true;
 
 	hr = m_gfx_device->m_dxgi_factory->CreateSwapChain(
-		m_gfx_device->device.Get(), &m_swap_desc, m_dxgi_swapchain.ReleaseAndGetAddressOf());
+		m_gfx_device->m_d3d11_device.Get(), &m_swap_desc, m_dxgi_swapchain.ReleaseAndGetAddressOf());
 	if (FAILED(hr))
 		throw std::exception("IDXGIFactory1::CreateSwapChain failed!\n");
 
 	device->m_dxgi_factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
 
 	//TODO: init texture for render target
-	Init(vid_info.m_canvas_width, vid_info.m_canvas_height);
+	//Init(vid_info.m_canvas_width, vid_info.m_canvas_height);
+	Init(vid_info.m_render_width, vid_info.m_render_height);
 }
 
 gfx_swapchain::~gfx_swapchain()
@@ -276,22 +298,26 @@ void enumerate_adapters() {
 
 gfx_device::gfx_device(uint32_t adapter_idx)
 :
-current_render_target(nullptr),
-current_zstencil_buf(nullptr),
-swapchain(nullptr)
+m_curr_render_target(nullptr),
+//m_curr_zstencil_buf(nullptr),
+m_swapchain(nullptr),
+m_vertex_shader(nullptr),
+m_pixel_shader(nullptr)
 {
 	InitFactory(adapter_idx);
 	InitDevice(adapter_idx);
-	SetRenderTarget(current_render_target, current_zstencil_buf);
+	SetRasterState();
+	SetRenderTarget(m_curr_render_target);
 }
 
 gfx_device::~gfx_device()
 {
+	delete m_vertex_shader;
+	delete m_pixel_shader;
 	m_dxgi_factory.Detach();
-	context.Detach();
-	device.Detach();
-	adapter.Detach();
-	delete swapchain;
+	m_d3d11_context.Detach();
+	m_d3d11_device.Detach();
+	m_dxgi_adapter.Detach();
 }
 
 void gfx_device::InitFactory(uint32_t adapter_idx) {
@@ -300,7 +326,7 @@ void gfx_device::InitFactory(uint32_t adapter_idx) {
 	if (FAILED(hr))
 		throw std::exception("CreateDXGIFactory(IDXGIFactory2) failed!");
 
-	hr = m_dxgi_factory->EnumAdapters1(adapter_idx, &adapter);
+	hr = m_dxgi_factory->EnumAdapters1(adapter_idx, &m_dxgi_adapter);
 	if (FAILED(hr))
 		throw std::exception("IDXGIFactory2::EnumAdapters failed!");
 }
@@ -321,28 +347,29 @@ void gfx_device::InitDevice(uint32_t adapter_idx) {
 	bool nv12_supported = false;
 
 	uint32_t create_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+#define DX11_DEBUG
 #ifdef DX11_DEBUG
 	create_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	HRESULT hr = 0;
 
-	hr = adapter->GetDesc(&desc);
+	hr = m_dxgi_adapter->GetDesc(&desc);
 	if (hr == S_OK)
 		adapter_name = desc.Description;
 	else
 		adapter_name = L"Unknown DXGI Adapter";
 
 	hr = D3D11CreateDevice(
-		adapter.Get(),
+		m_dxgi_adapter.Get(),
 		D3D_DRIVER_TYPE_UNKNOWN,
 		NULL,
 		create_flags,
 		feature_levels,
 		sizeof(feature_levels) / sizeof(D3D_FEATURE_LEVEL),
-		D3D11_SDK_VERSION, device.ReleaseAndGetAddressOf(),
+		D3D11_SDK_VERSION, m_d3d11_device.ReleaseAndGetAddressOf(),
 		&feature_level,
-		context.ReleaseAndGetAddressOf()
+		m_d3d11_context.ReleaseAndGetAddressOf()
 	);
 	if (FAILED(hr))
 		throw std::exception("D3D11CreateDevice failed!");
@@ -357,48 +384,109 @@ void gfx_device::InitDevice(uint32_t adapter_idx) {
 	//TODO: check for NV12 support
 }
 
-void gfx_device::InitShaders() {
-	vertex_shader = new gfx_vertex_shader(this->swapchain);
+bool gfx_device::InitShaders(const wchar_t *vs_path, const wchar_t *ps_path) {
+	bool res = false;
 
-	gfx_vertex vert[3];
-	vert[0].position = { -1.0, -1.0, 0.0 };
-	vert[1].position = { 1.0, 1.0, 0.0 };
-	vert[2].position = { 1.0, -1.0, 0.0 };
+	m_vertex_shader = new gfx_vertex_shader(std::make_shared<gfx_device_t>(*this));
+	m_pixel_shader = new gfx_pixel_shader(std::make_shared<gfx_device_t>(*this));
 
-	vertex_shader->CreateVertexBuffer(vert, sizeof(gfx_vertex_t) * 3);
+	// Rectangle verts
+	gfx_vertex vert[6];
+	vert[0].position = { -100.0, -100.0, 0.0, 1.0 };
+	vert[1].position = { -100.0, 100.0, 0.0, 1.0 };
+	vert[2].position = { 100.0, -100.0, 0.0, 1.0 };
+	vert[3].position = { 100.0, -100.0, 0.0, 1.0 };
+	vert[4].position = { -100.0, 100.0, 0.0, 100.0 };
+	vert[5].position = { 100.0, 100.0, 0.0, 1.0 };
+	vert[0].tex_coord = { 0.0, 1.0 };
+	vert[1].tex_coord = { 0.0, 0.0 };
+	vert[2].tex_coord = { 1.0, 1.0 };
+	vert[3].tex_coord = { 1.0, 1.0 };
+	vert[4].tex_coord = { 0.0, 0.0 };
+	vert[5].tex_coord = { 1.0, 0.0 };
+	// Create Vertex Shader
+	m_vertex_shader->CreateVertexBuffer(vert, sizeof(gfx_vertex_t) * 6);
+	m_vertex_shader->CompileVertexShader(vs_path);
+	m_pixel_shader->CompilePixelShader(ps_path);
 
-	vertex_shader->InitInputElements();
-}
+	if (m_vertex_shader->m_shader_blob && m_pixel_shader->m_shader_blob) {
+		m_d3d11_device->CreateVertexShader(
+			m_vertex_shader->m_shader_blob->GetBufferPointer(),
+			m_vertex_shader->m_shader_blob->GetBufferSize(),
+			nullptr,
+			&m_vertex_shader->m_shader);
+		
+		m_vertex_shader->InitInputElements();
+		m_vertex_shader->InitMatrixBuffer();
 
-void gfx_device::SetRenderTarget(gfx_texture_2d_t* texture, gfx_zstencil_buffer_t* zstencil) {
-	if (swapchain) {
-		if (!texture)
-			texture = &this->swapchain->m_render_target_tex;
-		if (!zstencil)
-			zstencil = &this->swapchain->m_zstencil;
+		// Create Pixel Shader
+
+		m_d3d11_device->CreatePixelShader(
+			m_pixel_shader->m_shader_blob->GetBufferPointer(),
+			m_pixel_shader->m_shader_blob->GetBufferSize(),
+			nullptr,
+			&m_pixel_shader->m_shader);
+		
+		m_pixel_shader->InitSamplerState();
+
+		res = true;
 	}
 
-	if (this->current_render_target == texture && this->current_zstencil_buf == zstencil)
+	return res;
+}
+
+void gfx_device::SetRasterState()
+{
+	HRESULT hr;
+	D3D11_RASTERIZER_DESC raster_desc;
+
+	raster_desc.AntialiasedLineEnable = false;
+	raster_desc.CullMode = D3D11_CULL_NONE;
+	raster_desc.DepthBias = 0;
+	raster_desc.DepthBiasClamp = 0.0f;
+	raster_desc.DepthClipEnable = false;
+	raster_desc.FillMode = D3D11_FILL_SOLID;
+	raster_desc.FrontCounterClockwise = false;
+	raster_desc.MultisampleEnable = false;
+	raster_desc.ScissorEnable = false;
+	raster_desc.SlopeScaledDepthBias = 0.0f;
+
+	// create the rasterizer
+	hr = m_d3d11_device->CreateRasterizerState(&raster_desc, m_d3d11_raster.GetAddressOf());
+
+	m_d3d11_context->RSSetState(m_d3d11_raster.Get());
+}
+
+void gfx_device::SetRenderTarget(gfx_texture_2d_t* texture) {
+	if (m_swapchain) {
+		if (!texture)
+			texture = &this->m_swapchain->m_render_target_tex;
+		/*if (!zstencil)
+			zstencil = &this->m_swapchain->m_zstencil;*/
+	}
+
+	//if (this->m_curr_render_target == texture && this->m_curr_zstencil_buf == zstencil)
+	if (m_curr_render_target == texture)
 		return;
 
 	if (texture && !texture->m_rtv)
 		return;
 
-	ID3D11RenderTargetView* rtv = texture->m_rtv.Get();
-	this->current_render_target = texture;
-	this->current_zstencil_buf = zstencil;
-	this->context->OMSetRenderTargets(1, &rtv, zstencil ? zstencil->zs_view.Get() : nullptr);
+	ID3D11RenderTargetView *rtv = texture->m_rtv.Get();
+	this->m_curr_render_target = texture;
+	//this->m_curr_zstencil_buf = zstencil;
+	this->m_d3d11_context->OMSetRenderTargets(1, &rtv, nullptr);
 }
 
 void gfx_device::ResetViewport(uint32_t width, uint32_t height) {
-	memset(&viewport, 0, sizeof(viewport));
-	viewport.Width = (float)width;
-	viewport.Height = (float)height;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-	context->RSSetViewports(1, &viewport);
+	memset(&m_viewport, 0, sizeof(m_viewport));
+	m_viewport.Width = (float)width;
+	m_viewport.Height = (float)height;
+	m_viewport.MinDepth = 0.0f;
+	m_viewport.MaxDepth = 1.0f;
+	m_viewport.TopLeftX = 0.0f;
+	m_viewport.TopLeftY = 0.0f;
+	m_d3d11_context->RSSetViewports(1, &m_viewport);
 }
 
 void gfx_vertex_shader::CreateVertexBuffer(void *data, size_t elem_size, bool dynamic_usage) {
@@ -409,13 +497,17 @@ void gfx_vertex_shader::CreateVertexBuffer(void *data, size_t elem_size, bool dy
 	memset(&desc, 0, sizeof(desc));
 	memset(&srd, 0, sizeof(srd));
 
-	desc.ByteWidth = (UINT)elem_size;
-	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	desc.Usage = dynamic_usage ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 	desc.CPUAccessFlags = dynamic_usage ? D3D11_CPU_ACCESS_WRITE : 0;
+	desc.ByteWidth = (UINT)elem_size;
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	desc.MiscFlags = 0;
+	
 	srd.pSysMem = data;
+	srd.SysMemPitch = 0;
+	srd.SysMemSlicePitch = 0;
 
-	hr = swapchain->m_gfx_device->device->CreateBuffer(&desc, &srd, &vertex_buffer);
+	hr = m_device->m_d3d11_device->CreateBuffer(&desc, &srd, &m_vertex_buffer);
 	if (FAILED(hr))
 		PLogger::log(LOG_LEVEL::Error, L"Error creating vertex buffer!\n");
 	else
@@ -423,24 +515,119 @@ void gfx_vertex_shader::CreateVertexBuffer(void *data, size_t elem_size, bool dy
 		PLogger::log(LOG_LEVEL::Info, L"Created Vertex Buffer\n");
 }
 
+HRESULT gfx_vertex_shader::CompileVertexShader(const wchar_t *shader_path)
+{
+	HRESULT hr;
+	uint32_t flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined (DEBUG) || defined(_DEBUG)
+	flags |= D3DCOMPILE_DEBUG;
+#endif
+	hr = D3DCompileFromFile(
+		shader_path, nullptr, nullptr,
+		"VSMain", "vs_4_0",
+		flags, 0, &m_shader_blob, &m_error_blob);
+	if (FAILED(hr))
+		if (m_error_blob)
+			PLogger::log(LOG_LEVEL::Error, (wchar_t *)m_error_blob->GetBufferPointer());
+		if (hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
+			PLogger::log(LOG_LEVEL::Error, L"Error: Vertex shader path not found: %s\n", shader_path);
+
+	return hr;
+}
+
 void gfx_vertex_shader::InitInputElements()
 {
-	D3D11_INPUT_ELEMENT_DESC desc[] = {
+	HRESULT hr;
+	D3D11_INPUT_ELEMENT_DESC layout[] = {
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
-    	{"COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+    	//{"COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		//{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
-	// todo: compile vertex shader first and use it here
-	struct {
-		char *data;
-		size_t size;
-	} VSFile;
-	VSFile.data = "adf";
-	VSFile.size = sizeof(VSFile.data);
+	hr = m_device->m_swapchain->m_gfx_device->m_d3d11_device->CreateInputLayout(layout, ARRAYSIZE(layout), m_shader_blob->GetBufferPointer(), m_shader_blob->GetBufferSize(), &m_vertex_layout);
+	if (FAILED(hr))
+		PLogger::log(LOG_LEVEL::Error, L"Error creating Vertex Shader input layout!\n");
+	m_device->m_d3d11_context->IASetInputLayout(m_vertex_layout.Get());
+}
 
-	swapchain->m_gfx_device->device->CreateInputLayout(desc, ARRAYSIZE(desc), VSFile.data, VSFile.size, &vertex_layout);
-	swapchain->m_gfx_device->context->IASetInputLayout(vertex_layout.Get());
+void gfx_vertex_shader::InitMatrixBuffer()
+{
+	HRESULT hr;
+	D3D11_BUFFER_DESC matrix_desc;
+	matrix_desc.Usage = D3D11_USAGE_DYNAMIC;
+	matrix_desc.ByteWidth = sizeof(gfx_matrix_buffer_t);
+	matrix_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrix_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrix_desc.MiscFlags = 0;
+	matrix_desc.StructureByteStride = 0;
+
+	hr = m_device->m_d3d11_device->CreateBuffer(&matrix_desc, nullptr, &m_matrix_buffer);
+	if (FAILED(hr))
+		PLogger::log(LOG_LEVEL::Error, L"Error creating Vertex Shader Matrix Buffer!\n");
+}
+
+void gfx_vertex_shader::SetParameters(struct Matrix &world, struct Matrix &proj)
+{
+	HRESULT hr;
+	D3D11_MAPPED_SUBRESOURCE mapped;
+	//world.Transpose();
+	//proj.Transpose();
+	struct gfx_matrix_buffer *matrix_buf;
+	
+	auto ctx = m_device->m_d3d11_context;		
+	hr = ctx->Map(m_matrix_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);	
+	if (FAILED(hr))
+		PLogger::log(LOG_LEVEL::Error, L"Failed to lock Matrix Buffer for writing!\n");
+	matrix_buf = (gfx_matrix_buffer_t *)mapped.pData;
+	matrix_buf->m_proj_matrix = proj;
+	matrix_buf->m_view_matrix = world;
+	
+	ctx->Unmap(m_matrix_buffer.Get(), 0);
+
+	ctx->VSSetConstantBuffers(0, 1, m_matrix_buffer.GetAddressOf());
+}
+
+HRESULT gfx_pixel_shader::CompilePixelShader(const wchar_t *shader_path)
+{
+	HRESULT hr;
+	uint32_t flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined (DEBUG) || defined(_DEBUG)
+	flags |= D3DCOMPILE_DEBUG;
+#endif
+
+	hr = D3DCompileFromFile(
+		shader_path, nullptr, nullptr,
+		"PSMain", "ps_4_0",
+		flags, 0, &m_shader_blob, &m_error_blob);
+	if (FAILED(hr))
+		if (m_error_blob)
+			PLogger::log(LOG_LEVEL::Error, (wchar_t *)m_error_blob->GetBufferPointer());
+	if (hr == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
+		PLogger::log(LOG_LEVEL::Error, L"Error: Pixel shader path not found: %s\n", shader_path);
+
+	return hr;
+}
+
+void gfx_pixel_shader::InitSamplerState()
+{
+	HRESULT hr;
+	D3D11_SAMPLER_DESC sampler_desc;
+	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.MipLODBias = 0.0f;
+	sampler_desc.MaxAnisotropy = 1;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	for (uint8_t b = 0; b < 4; b++)
+		sampler_desc.BorderColor[b] = 0;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+	hr = m_device->m_swapchain->m_gfx_device->m_d3d11_device->CreateSamplerState(
+		&sampler_desc, &m_sampler_state);
+	if (FAILED(hr))
+		PLogger::log(LOG_LEVEL::Error, L"Error creating Sampler State for pixel shader!\n");
 }
 
 };
