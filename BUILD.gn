@@ -1,9 +1,7 @@
 shared_library("Utils") {
   sources = [
     "//src/PLogger.cpp",
-    "//src/PObject.cpp",
   ]
-
   include_dirs = [
     "//src",
     "//inc",
@@ -11,14 +9,15 @@ shared_library("Utils") {
 }
 
 shared_library("Graphics") {
+
   sources = [
-    "//src/GraphicsD3D11.cpp",
+    "//src/PGraphics.cpp",
   ]
 
   include_dirs = [
-    "//src",
     "//inc",
-    "//DirectXTX//Inc"
+    "//src",
+    "//DirectXTK/Inc", 
   ]
 
   if (is_windows) {
@@ -29,23 +28,23 @@ shared_library("Graphics") {
     ]
   }
 
+  data_deps = [ ":Utils" ]
+  
   cflags_cc = [ "/wd4251" ]
   ldflags = [ "$default_output_dir/Utils.lib" ]
 }
 
 executable("App") {
   sources = [
-    # "//src/GraphicsD3D11.cpp",
-    "//src/PGraphics.cpp",
     "//src/PMainWindow.cpp",
     "//src/PWindow.cpp",
     "//src/main.cpp",
   ]
 
   include_dirs = [
+    "//DirectXTK/Inc", 
     "//src",
     "//inc",
-    "//DirectXTK//Inc",
   ]
 
   if (is_windows) {
@@ -57,6 +56,8 @@ executable("App") {
   }
 
   cflags_cc = [ "/wd4251" ]
+  data_deps = [ ":Utils", ":Graphics" ]
+  
   ldflags = [
     "$default_output_dir/Utils.lib",
     "$default_output_dir/Graphics.lib",

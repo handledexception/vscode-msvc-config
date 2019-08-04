@@ -16,9 +16,9 @@
 /////////////
 cbuffer MatrixBuffer
 {
-	matrix worldMatrix;
-	matrix viewMatrix;
-	matrix projectionMatrix;
+	matrix world;
+	matrix view;
+	matrix proj;
 };
 
 
@@ -50,10 +50,9 @@ PixelInputType VSMain(VertexInputType input)
     input.position.w = 1.0f;
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
-    output.position = mul(output.position, worldMatrix);
-    // float4 tmp = mul(input.position, viewMatrix);
-    output.position = mul(input.position, viewMatrix);
-    output.position = mul(output.position, projectionMatrix);
+    output.position = mul(output.position, world);
+    output.position = mul(input.position, view);
+    output.position = mul(output.position, proj);
     
 	// Store the texture coordinates for the pixel shader.
 	output.tex = input.tex;
