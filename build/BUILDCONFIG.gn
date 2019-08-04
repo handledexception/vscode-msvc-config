@@ -43,4 +43,12 @@ set_defaults("shared_library") {
   ]
 }
 
+set_defaults("static_library") {
+  configs = [
+    "//build:compiler_defaults",
+    "//build:default_libs",
+    "//build:linker_defaults",
+  ]
+}
+
 set_default_toolchain("//build/toolchain:msvc")

@@ -28,13 +28,25 @@ toolchain("msvc") {
     ]
   }
 
+  tool("alink") {
+    default_output_extension = ".a"
+    aname = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
+    rspfile = "{{output}}_alink.rsp"
+    rspfile_content = "{{inputs}}"
+    pdbname = "$object_subdir/{{target_output_name}}_alink.pdb"
+    command = "$link /OUT:$aname /PDB:$pdbname @$rspfile"
+    outputs = [
+      aname,
+    ]
+  }
+
   tool("link") {
     default_output_extension = ".exe"
     exename = "{{output_dir}}/{{target_output_name}}{{output_extension}}"
     rspfile = "{{output}}_link.rsp"
-    rspfile_content = "{{inputs}} {{solibs}} {{libs}} {{ldflags}}"
+    rspfile_content = "{{inputs}} {{libs}} {{ldflags}}"
     pdbname = "$object_subdir/{{target_output_name}}_link.pdb"
-    command = "$link /OUT:$exename /PDB:$pdbname {{inputs}} {{solibs}} {{libs}} {{ldflags}}"
+    command = "$link /OUT:$exename /PDB:$pdbname @$rspfile"
     outputs = [
       exename,
     ]
