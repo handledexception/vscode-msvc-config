@@ -14,22 +14,22 @@ PWindow::PWindow(
 	HWND parent
 )
 :
-mWindowTitle(title),
-mWindowClassName(nullptr),
-mPosX(cx),
-mPosY(cy),
-mWidth(width),
-mHeight(height),
-mInstance(hinst),
-mParentHwnd(parent),
-mHwnd(nullptr)
+m_window_title(title),
+m_windowclass_name(nullptr),
+m_cx(cx),
+m_cy(cy),
+m_width(width),
+m_height(height),
+m_instance(hinst),
+m_parent_hwnd(parent),
+m_hwnd(nullptr)
 {
 }
 
 PWindow::~PWindow() {
-	if (mHwnd) {
-		DestroyWindow(mHwnd);
-		mHwnd = nullptr;
+	if (m_hwnd) {
+		DestroyWindow(m_hwnd);
+		m_hwnd = nullptr;
 	}
 }
 
@@ -54,13 +54,13 @@ LRESULT PWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 void PWindow::Show(bool show) {
 	if (show == true) {
-		ShowWindowAsync(mHwnd, SW_SHOWNORMAL);
+		ShowWindowAsync(m_hwnd, SW_SHOWNORMAL);
 	}
 	else {
-		ShowWindowAsync(mHwnd, SW_HIDE);
+		ShowWindowAsync(m_hwnd, SW_HIDE);
 	}
 
-	UpdateWindow(mHwnd);
+	UpdateWindow(m_hwnd);
 }
 
 LRESULT CALLBACK PWindow::static_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
@@ -91,7 +91,7 @@ void PWindow::register_class() {
 	WNDCLASSEX wcex;
 
 	// window class already registered
-	if (GetClassInfoEx(mInstance, mWindowTitle, &wcex)) {
+	if (GetClassInfoEx(m_instance, m_window_title, &wcex)) {
 		OutputDebugString(L"Window class already registered!\n");
 		return;
 	}
@@ -101,12 +101,12 @@ void PWindow::register_class() {
 	wcex.lpfnWndProc = &PWindow::static_wndproc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = mInstance;
+	wcex.hInstance = m_instance;
 	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
 	wcex.lpszMenuName = nullptr;
-	wcex.lpszClassName = mWindowTitle;
+	wcex.lpszClassName = m_window_title;
 	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
 	if (RegisterClassEx(&wcex) == 0) {
@@ -118,19 +118,19 @@ void PWindow::register_class() {
 HWND PWindow::create_hwnd(int32_t exStyle, int32_t style) {
 	HWND hwnd = CreateWindowEx(
 		exStyle,
-		mWindowTitle,
-		mWindowTitle,
+		m_window_title,
+		m_window_title,
 		style,
-		mPosX, mPosY,
-		mWidth, mHeight,
-		mParentHwnd,
+		m_cx, m_cy,
+		m_width, m_height,
+		m_parent_hwnd,
 		nullptr,
-		mInstance,
+		m_instance,
 		reinterpret_cast<LPVOID>(this));
 
-	mHwnd = hwnd;
+	m_hwnd = hwnd;
 
-	SetWindowLongPtr(mHwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+	SetWindowLongPtr(m_hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 	return hwnd;
 }

@@ -30,16 +30,16 @@ LRESULT PMainWindow::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 					break;
 				case IDM_FILE_QUIT:
 					OutputDebugString(L"IDM_FILE_QUIT\n");
-					PostMessage(mHwnd, WM_CLOSE, 0, 0);
+					PostMessage(m_hwnd, WM_CLOSE, 0, 0);
 					break;
 				case IDM_HELP_ABOUT:
-					auto res = MessageBox(mHwnd, L"About my app", L"About", 1 | MB_ICONINFORMATION);
+					auto res = MessageBox(m_hwnd, L"About my app", L"About", 1 | MB_ICONINFORMATION);
 					OutputDebugString(L"CMainWindow::WndProc -> IDM_HELP_ABOUT");
 					break;
 			}
 			break;
 		case WM_CLOSE:
-			DestroyWindow(mHwnd);
+			DestroyWindow(m_hwnd);
 			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
@@ -64,7 +64,7 @@ void PMainWindow::install_menubar() {
 	::AppendMenu(hMenubar, MF_POPUP, (UINT_PTR)hFileMenu, L"&File");
 	::AppendMenu(hMenubar, MF_POPUP, (UINT_PTR)hHelpMenu, L"&Help");
 
-	::SetMenu(mHwnd, hMenubar);
+	::SetMenu(m_hwnd, hMenubar);
 
-	::DrawMenuBar(mHwnd);
+	::DrawMenuBar(m_hwnd);
 }

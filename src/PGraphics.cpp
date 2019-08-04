@@ -13,7 +13,7 @@ namespace gfx {
 
 const int32_t MAX_SCENES = 2048;
 const float Z_FAR = 1000.f;
-const float Z_NEAR = 1.f;
+const float Z_NEAR = 0.1f;
 
 void render_clear() {
 	auto device = graphics_core->m_gfx_device;
@@ -32,7 +32,7 @@ void render_clear() {
 		ctx->IASetVertexBuffers(0, 1, vert_buf, &vert_stride, &vert_offset);
 		ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		device->m_vertex_shader->SetParameters(
-			device->m_model_matrix,
+			device->m_world_matrix,
 			device->m_view_matrix,
 			device->m_proj_matrix);
 		ctx->VSSetShader(device->m_vertex_shader->m_shader.Get(), nullptr, 0);
@@ -387,12 +387,12 @@ bool GraphicsDevice::InitShaders(const wchar_t *vs_path, const wchar_t *ps_path)
 
 	// Rectangle verts
 	Vertex vert[6];
-	vert[0].m_position = { -100.0, -100.0, 0.0, 1.0 };
-	vert[1].m_position = { -100.0, 100.0, 0.0, 1.0 };
-	vert[2].m_position = { 100.0, -100.0, 0.0, 1.0 };
-	vert[3].m_position = { 100.0, -100.0, 0.0, 1.0 };
-	vert[4].m_position = { -100.0, 100.0, 0.0, 1.0 };
-	vert[5].m_position = { 100.0, 100.0, 0.0, 1.0 };
+	vert[0].m_position = { -100.0, -100.0, 0.f, 1.0 };
+	vert[1].m_position = { -100.0, 100.0, 0.f, 1.0 };
+	vert[2].m_position = { 100.0, -100.0, 0.f, 1.0 };
+	vert[3].m_position = { 100.0, -100.0, 0.f, 1.0 };
+	vert[4].m_position = { -100.0, 100.0, 0.f, 1.0 };
+	vert[5].m_position = { 100.0, 100.0, 0.f, 1.0 };
 	vert[0].m_tex_coord = { 0.0, 1.0 };
 	vert[1].m_tex_coord = { 0.0, 0.0 };
 	vert[2].m_tex_coord = { 1.0, 1.0 };
@@ -434,8 +434,8 @@ void GraphicsDevice::SetProjection(uint32_t width, uint32_t height, bool ortho)
 {
 	// Perspective projection
 	if (!ortho) {
-		float fov_y = (float)DirectX::XM_PI / 4.0f;
-		float deg2rad = DirectX::XMConvertToRadians(45.0);
+		// float fov_y = (float)DirectX::XM_PI / 4.0f;
+		float fov_y = DirectX::XMConvertToRadians(120.f);
 		float aspect = (float)width / (float)height;
 		m_proj_matrix = DirectX::XMMatrixPerspectiveFovLH(fov_y, aspect, Z_NEAR, Z_FAR);
 	}
@@ -449,7 +449,7 @@ void GraphicsDevice::SetProjection(uint32_t width, uint32_t height, bool ortho)
 		);
 	}
 
-	m_model_matrix = DirectX::XMMatrixIdentity();
+	m_world_matrix = DirectX::XMMatrixIdentity();
 	m_view_matrix = DirectX::XMMatrixIdentity();
 }
 
@@ -585,13 +585,13 @@ void VertexShader::InitMatrixBuffer()
 		PLogger::log(LOG_LEVEL::Error, L"Error creating Vertex Shader Matrix Buffer!\n");
 }
 
-void VertexShader::SetParameters(struct Matrix& model, struct Matrix &view, struct Matrix &proj)
+void VertexShader::SetParameters(struct Matrix& world, struct Matrix &view, struct Matrix &proj)
 {
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mapped;
 	MatrixBuffer *matrix_buf;
 
-	model.Transpose();
+	world.Transpose();
 	view.Transpose();
 	proj.Transpose();
 
@@ -600,7 +600,7 @@ void VertexShader::SetParameters(struct Matrix& model, struct Matrix &view, stru
 	if (FAILED(hr))
 		PLogger::log(LOG_LEVEL::Error, L"Failed to lock Matrix Buffer for writing!\n");
 	matrix_buf = (MatrixBuffer *)mapped.pData;
-	matrix_buf->m_model_matrix = model;
+	matrix_buf->m_world_matrix = world;
 	matrix_buf->m_view_matrix = view;
 	matrix_buf->m_proj_matrix = proj;
 

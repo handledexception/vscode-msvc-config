@@ -22,7 +22,7 @@ void init_graphics_desc(gfx::GraphicsDesc& desc)
 	desc.m_render_height = RENDER_HEIGHT;
 	desc.m_render_width = RENDER_WIDTH;
 	desc.m_enable_zbuffer = true;
-	desc.m_orthographic = false;
+	desc.m_orthographic = true;
 	desc.m_dxgi_format = DXGI_FORMAT_R8G8B8A8_UNORM;
 }
 
@@ -32,7 +32,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 
 	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
-	PMainWindow* main_wnd = new PMainWindow(L"PaulApp", CW_USEDEFAULT, CW_USEDEFAULT, 1280, 800, hInstance, nullptr);
+	PMainWindow* main_wnd = new PMainWindow(
+		L"PaulApp", CW_USEDEFAULT, CW_USEDEFAULT, 1280, 800, hInstance, nullptr);
 
 	main_wnd->Init(
 		WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW, /* ex style */
@@ -40,7 +41,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 	);
 	main_wnd->Show(true);
 
-	PWindow* view_wnd = new PWindow(L"PaulDX11", 20, 20, RENDER_WIDTH, RENDER_HEIGHT, hInstance, main_wnd->GetHandle());
+	PWindow* view_wnd = new PWindow(
+		L"PaulDX11", 20, 20, RENDER_WIDTH, RENDER_HEIGHT, hInstance, main_wnd->GetHandle());
 	view_wnd->Init(NULL, WS_CHILD | WS_CLIPCHILDREN);
 	view_wnd->Show(true);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#define GFX_DLL_EXPORT __declspec( dllexport )
+#define GFX_EXPORT __declspec( dllexport )
 
 #include "PWindow.h"
 
@@ -105,7 +105,7 @@ struct GraphicsDevice {
 	VertexShader *m_vertex_shader;
 	PixelShader *m_pixel_shader;
 
-	struct Matrix m_model_matrix;
+	struct Matrix m_world_matrix;
 	struct Matrix m_view_matrix;
 	struct Matrix m_proj_matrix;
 };
@@ -147,7 +147,7 @@ struct Vertex {
 };
 
 struct MatrixBuffer {
-	struct Matrix m_model_matrix;
+	struct Matrix m_world_matrix;
 	struct Matrix m_view_matrix;
 	struct Matrix m_proj_matrix;
 };
@@ -201,7 +201,7 @@ static std::thread render_thread;
 void enumerate_monitors(GraphicsAdapter& adapter, ComPtr<IDXGIAdapter1> dxgi_adapter);
 void enumerate_adapters();
 void render_thread_main();
-GFX_DLL_EXPORT void reset_graphics(GraphicsDesc& gfx_desc, HWND view_wnd);
-GFX_DLL_EXPORT void shutdown_graphics();
+GFX_EXPORT void reset_graphics(GraphicsDesc& gfx_desc, HWND view_wnd);
+GFX_EXPORT void shutdown_graphics();
 
 }; // namespace gfx
